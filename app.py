@@ -37,6 +37,8 @@ if "last_user_input" not in st.session_state:
     st.session_state.last_user_input = ""
 if "feedback_submitted" not in st.session_state:
     st.session_state.feedback_submitted = False
+if "rerun_query" not in st.session_state:
+    st.session_state.rerun_query = None
 
 
 def stream_agent_response(client, user_input: str, system_prompt: str) -> List[Dict[str, Any]]:
@@ -294,6 +296,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
