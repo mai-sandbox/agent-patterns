@@ -88,6 +88,34 @@ def display_message(role: str, content: str):
         st.write(content)
 
 
+def update_system_prompt_with_feedback(current_prompt: str, feedback: str) -> str:
+    """
+    Update the system prompt by incorporating user feedback.
+    
+    Args:
+        current_prompt: Current system prompt
+        feedback: User feedback to incorporate
+        
+    Returns:
+        Updated system prompt
+    """
+    # Simple approach: append feedback as additional instructions
+    updated_prompt = f"""{current_prompt}
+
+IMPORTANT FEEDBACK FROM USER:
+{feedback}
+
+Please take this feedback into account in your responses and adjust your behavior accordingly."""
+    
+    return updated_prompt
+
+
+def reset_feedback_state():
+    """Reset feedback-related session state."""
+    st.session_state.show_feedback = False
+    st.session_state.feedback_submitted = False
+
+
 def main():
     """Main Streamlit application."""
     st.title("🤖 LangGraph Agent Chat")
@@ -210,5 +238,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
