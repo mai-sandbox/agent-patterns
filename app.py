@@ -132,6 +132,15 @@ def main():
     else:
         st.success("✅ Connected to LangGraph server at http://localhost:2024")
     
+    # Handle rerun query if set
+    if st.session_state.rerun_query:
+        rerun_input = st.session_state.rerun_query
+        st.session_state.rerun_query = None  # Clear the rerun flag
+        # Process the rerun as if it was a new user input
+        st.session_state.messages.append({"role": "user", "content": rerun_input})
+        # The rest of the processing will be handled by the normal flow below
+        user_input = rerun_input
+    
     # Sidebar for configuration
     with st.sidebar:
         st.header("⚙️ Configuration")
@@ -296,6 +305,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
