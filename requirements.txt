@@ -1,0 +1,8 @@
+langgraph
+langgraph-sdk
+langgraph-cli
+langchain-openai
+langchain-core
+streamlit
+python-dotenv
+
