@@ -156,7 +156,7 @@ def main():
             st.rerun()
         
         # Display current system prompt
-        st.info(f"**Current System Prompt:**
+        st.info(f"**Current System Prompt:**\n\n{st.session_state.system_prompt}")
     
     # Main chat interface
     st.header("💬 Chat Interface")
