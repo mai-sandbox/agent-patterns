@@ -302,11 +302,13 @@ def main():
     # Clear chat button
     if st.button("🗑️ Clear Chat History"):
         st.session_state.messages = []
+        reset_feedback_state()
         st.rerun()
 
 
 if __name__ == "__main__":
     main()
+
 
 
 
