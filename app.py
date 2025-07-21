@@ -229,6 +229,62 @@ def main():
         
         # Add assistant response to history
         st.session_state.messages.append({"role": "assistant", "content": full_response})
+        
+        # Store the last user input for potential rerun
+        st.session_state.last_user_input = user_input
+        
+        # Show feedback collection after agent response
+        st.session_state.show_feedback = True
+    
+    # Feedback collection interface (appears after agent response)
+    if st.session_state.show_feedback and not st.session_state.feedback_submitted:
+        st.markdown("---")
+        st.subheader("📝 Provide Feedback")
+        st.markdown("How was the agent's response? Your feedback will help improve future responses.")
+        
+        # Feedback text area
+        feedback_text = st.text_area(
+            "Enter your feedback:",
+            placeholder="e.g., 'The response was too verbose, please be more concise' or 'Great answer, but I need more technical details'",
+            height=100,
+            key="feedback_input"
+        )
+        
+        # Feedback submission buttons
+        col1, col2, col3 = st.columns([1, 1, 2])
+        
+        with col1:
+            if st.button("✅ Submit Feedback", type="primary"):
+                if feedback_text.strip():
+                    # Update system prompt with feedback
+                    updated_prompt = update_system_prompt_with_feedback(
+                        st.session_state.system_prompt, 
+                        feedback_text
+                    )
+                    st.session_state.system_prompt = updated_prompt
+                    st.session_state.feedback_submitted = True
+                    st.success("✅ Feedback submitted! System prompt has been updated.")
+                    st.rerun()
+                else:
+                    st.warning("Please enter some feedback before submitting.")
+        
+        with col2:
+            if st.button("❌ Skip Feedback"):
+                reset_feedback_state()
+                st.rerun()
+    
+    # Rerun with updated config (appears after feedback submission)
+    if st.session_state.feedback_submitted and st.session_state.last_user_input:
+        st.markdown("---")
+        st.subheader("🔄 Rerun with Updated Configuration")
+        st.info("The system prompt has been updated based on your feedback. You can now rerun your previous query with the improved configuration.")
+        
+        if st.button("🚀 Rerun with Updated Config", type="primary"):
+            # Reset feedback state and rerun the previous query
+            reset_feedback_state()
+            # Trigger rerun by setting the user input in session state
+            st.session_state.rerun_query = st.session_state.last_user_input
+            st.rerun()
     
     # Clear chat button
     if st.button("🗑️ Clear Chat History"):
@@ -238,6 +294,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
