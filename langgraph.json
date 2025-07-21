@@ -1,0 +1,17 @@
+{
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "agent": {
+      "path": "src.agent:graph",
+      "config_schema": {
+        "system_prompt": {
+          "type": "string",
+          "default": "You are a helpful AI assistant with access to web search. Use tools when needed to provide accurate and up-to-date information."
+        }
+      }
+    }
+  }
+}
+
