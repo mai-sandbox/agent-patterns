@@ -168,6 +168,12 @@ def main():
     # User input
     user_input = st.chat_input("Type your message here...")
     
+    # Check for rerun query
+    if st.session_state.rerun_query:
+        user_input = st.session_state.rerun_query
+        st.session_state.rerun_query = None  # Clear the rerun flag
+        st.info(f"🔄 Rerunning with updated configuration: '{user_input}'")
+    
     if user_input:
         # Add user message to history
         st.session_state.messages.append({"role": "user", "content": user_input})
@@ -301,6 +307,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
