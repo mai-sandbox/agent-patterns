@@ -31,6 +31,12 @@ if "client" not in st.session_state:
     except Exception as e:
         st.session_state.client = None
         st.session_state.connection_error = str(e)
+if "show_feedback" not in st.session_state:
+    st.session_state.show_feedback = False
+if "last_user_input" not in st.session_state:
+    st.session_state.last_user_input = ""
+if "feedback_submitted" not in st.session_state:
+    st.session_state.feedback_submitted = False
 
 
 def stream_agent_response(client, user_input: str, system_prompt: str) -> List[Dict[str, Any]]:
@@ -204,4 +210,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
