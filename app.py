@@ -76,14 +76,14 @@ def stream_agent_response(client, agent_name: str, input_data: Dict[str, Any], c
         response_container = st.empty()
         full_response = ""
         
-        for chunk in client.runs.stream(
+        for stream_mode, chunk in client.runs.stream(
             thread["thread_id"],
             agent_name,
             input=input_data,
             config=thread_config,
-            stream_mode="updates"
+            stream_mode=["values", "updates", "messages"]
         ):
-            if chunk and hasattr(chunk, 'data'):
+            if stream_mode == 'updates' and chunk and hasattr(chunk, 'data'):
                 chunk_data = str(chunk.data)
                 full_response += chunk_data + "\n"
                 response_container.markdown(f"```\n{full_response}\n```")
