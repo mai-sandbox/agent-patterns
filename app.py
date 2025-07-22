@@ -101,7 +101,7 @@ def update_configuration_from_feedback(current_config: Dict[str, Any], feedback:
     """Update configuration based on user feedback."""
     updated_config = current_config.copy()
     
-    # Simple feedback processing - in a real app, you might use LLM to parse feedback
+    # Enhanced feedback processing with more sophisticated parsing
     feedback_lower = feedback.lower()
     
     if "configurable" not in updated_config:
@@ -111,22 +111,86 @@ def update_configuration_from_feedback(current_config: Dict[str, Any], feedback:
     updated_config["configurable"]["user_feedback"] = feedback
     updated_config["configurable"]["feedback_timestamp"] = datetime.now().isoformat()
     
-    # Example: Extract specific configuration updates from feedback
+    # Enhanced parameter extraction with better regex patterns
+    import re
+    
+    # Temperature extraction with more flexible patterns
     if "temperature" in feedback_lower:
         try:
-            # Try to extract temperature value
-            import re
-            temp_match = re.search(r"temperature[\s:=]*(\d*\.?\d+)", feedback_lower)
+            # Multiple patterns for temperature extraction
+            patterns = [
+                r"temperature[\s:=]*(\d*\.?\d+)",
+                r"temp[\s:=]*(\d*\.?\d+)",
+                r"set.*temperature.*to[\s]*(\d*\.?\d+)",
+                r"use.*temperature.*of[\s]*(\d*\.?\d+)"
+            ]
+            temp_match = None
+            for pattern in patterns:
+                temp_match = re.search(pattern, feedback_lower)
+                if temp_match:
+                    break
             if temp_match:
-                updated_config["configurable"]["temperature"] = float(temp_match.group(1))
+                temp_value = float(temp_match.group(1))
+                # Validate temperature range (0.0 to 2.0 is typical for LLMs)
+                if 0.0 <= temp_value <= 2.0:
+                    updated_config["configurable"]["temperature"] = temp_value
+                else:
+                    st.warning(f"Temperature {temp_value} is outside typical range (0.0-2.0). Using default.")
         except:
             pass
     
+    # Enhanced verbosity detection
     if "verbose" in feedback_lower or "detailed" in feedback_lower:
         updated_config["configurable"]["verbose"] = True
+        updated_config["configurable"]["response_style"] = "detailed"
     
     if "concise" in feedback_lower or "brief" in feedback_lower:
         updated_config["configurable"]["verbose"] = False
+        updated_config["configurable"]["response_style"] = "concise"
+    
+    # Max tokens extraction
+    max_tokens_patterns = [
+        r"max[\s_]*tokens[\s:=]*(\d+)",
+        r"limit.*tokens.*to[\s]*(\d+)",
+        r"use.*(\d+).*tokens"
+    ]
+    for pattern in max_tokens_patterns:
+        match = re.search(pattern, feedback_lower)
+        if match:
+            try:
+                tokens = int(match.group(1))
+                if 1 <= tokens <= 32000:  # Reasonable token limits
+                    updated_config["configurable"]["max_tokens"] = tokens
+                break
+            except:
+                pass
+    
+    # Response style and tone detection
+    if any(word in feedback_lower for word in ["creative", "imaginative", "original"]):
+        updated_config["configurable"]["creativity"] = "high"
+        if "temperature" not in updated_config["configurable"]:
+            updated_config["configurable"]["temperature"] = 0.8
+    
+    if any(word in feedback_lower for word in ["factual", "accurate", "precise", "conservative"]):
+        updated_config["configurable"]["creativity"] = "low"
+        if "temperature" not in updated_config["configurable"]:
+            updated_config["configurable"]["temperature"] = 0.2
+    
+    # Speed vs quality preferences
+    if any(word in feedback_lower for word in ["faster", "quicker", "speed"]):
+        updated_config["configurable"]["priority"] = "speed"
+    
+    if any(word in feedback_lower for word in ["quality", "better", "thorough"]):
+        updated_config["configurable"]["priority"] = "quality"
+    
+    # Add feedback analysis summary
+    updated_config["configurable"]["feedback_analysis"] = {
+        "original_feedback": feedback,
+        "extracted_preferences": {
+            k: v for k, v in updated_config["configurable"].items() 
+            if k not in ["user_feedback", "feedback_timestamp", "feedback_analysis"]
+        }
+    }
     
     return updated_config
 
@@ -346,3 +410,4 @@ st.markdown(
     "💡 **Tip:** Make sure your LangGraph agent is running with `langgraph dev` before connecting. "
     "The default URL is http://localhost:2024"
 )
+
