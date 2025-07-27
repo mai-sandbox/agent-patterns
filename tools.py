@@ -65,3 +65,16 @@ def ice_cream_flavor_tool() -> str:
     try:
         search = TavilySearchResults(max_results=3)
         query = "most popular ice cream flavors 2024 favorite trends survey"
+        results = search.invoke({"query": query})
+        
+        if not results:
+            return "No information found about current ice cream flavor trends."
+        
+        formatted_results = []
+        formatted_results.append("Current Ice Cream Flavor Trends:\n")
+        
+        for i, result in enumerate(results, 1):
+            title = result.get("title", "No title")
+            content = result.get("content", "No content")
+            formatted_results.append(f"{i}. {title}\n   {content}\n")
+        
