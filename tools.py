@@ -1,6 +1,5 @@
 """Custom tools for the multi-functional web-enabled agent."""
 
-import os
 from typing import Optional
 
 from langchain_core.tools import tool
@@ -81,3 +80,4 @@ def ice_cream_flavor_tool() -> str:
         return "\n".join(formatted_results)
     except Exception as e:
         return f"Error getting ice cream flavor information: {str(e)}"
+
