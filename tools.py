@@ -78,3 +78,4 @@ def ice_cream_flavor_tool() -> str:
             content = result.get("content", "No content")
             formatted_results.append(f"{i}. {title}\n   {content}\n")
         
+        return "\n".join(formatted_results)
