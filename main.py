@@ -1,7 +1,6 @@
 """Multi-functional web-enabled agent with weather, web search, and ice cream flavor capabilities."""
 
 import os
-from typing import Dict, Any
 
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
