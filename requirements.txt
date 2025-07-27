@@ -1,0 +1,9 @@
+langgraph>=0.2.0
+langchain>=0.2.0
+langchain-community
+langchain-tavily
+langchain-anthropic
+pyowm
+python-dotenv
+ruff>=0.1.0
+mypy>=1.7.0
