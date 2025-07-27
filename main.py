@@ -98,3 +98,15 @@ def main() -> None:
     setup_environment()
     
     agent = create_agent()
+    if agent is None:
+        return
+    
+    try:
+        run_conversation(agent)
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        print("Please check your configuration and try again.")
+
+
+if __name__ == "__main__":
+    main()
