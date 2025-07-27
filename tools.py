@@ -79,3 +79,5 @@ def ice_cream_flavor_tool() -> str:
             formatted_results.append(f"{i}. {title}\n   {content}\n")
         
         return "\n".join(formatted_results)
+    except Exception as e:
+        return f"Error getting ice cream flavor information: {str(e)}"
