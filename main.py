@@ -87,3 +87,15 @@ def run_conversation(agent) -> None:
                         print(last_message.content)
         
         except KeyboardInterrupt:
+            print("\n\n👋 Goodbye! Thanks for using the Multi-Functional Agent!")
+            break
+        except Exception as e:
+            print(f"\n❌ Error: {str(e)}")
+            print("Please try again with a different question.")
+
+
+def main() -> None:
+    """Main function to run the multi-functional web-enabled agent."""
+    setup_environment()
+    
+    agent = create_agent()
