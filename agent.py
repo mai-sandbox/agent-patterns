@@ -6,7 +6,6 @@ to answer questions beyond its training data. The system prompt is configurable
 via the assistant configuration.
 """
 
-import os
 from typing import Annotated, Dict, Any
 from typing_extensions import TypedDict
 
