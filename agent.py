@@ -33,9 +33,9 @@ def create_agent_graph() -> StateGraph:
     # Initialize the LLM with tool binding
     # Using Anthropic Claude as the preferred model
     llm = ChatAnthropic(
-        model_name="claude-3-5-sonnet-20241022",
+        model="claude-3-5-sonnet-20241022",
         temperature=0.1
-    )
+    )  # type: ignore[call-arg]
     llm_with_tools = llm.bind_tools(tools)
     
     def chatbot(state: State) -> Dict[str, Any]:
@@ -83,4 +83,5 @@ graph = graph_builder.compile()
 
 # Export the compiled graph as 'app' for LangGraph deployment compatibility
 app = graph
+
 
