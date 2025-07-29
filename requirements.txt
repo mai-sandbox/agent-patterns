@@ -1,0 +1,33 @@
+# Core LangGraph dependencies
+langgraph>=0.2.0
+langchain>=0.2.0
+langchain-core>=0.2.0
+
+# LangGraph Platform and SDK
+langgraph-sdk>=0.1.0
+langgraph-cli[inmem]>=0.1.0
+
+# LLM Provider (Anthropic preferred)
+langchain-anthropic>=0.1.0
+
+# Alternative LLM Provider (OpenAI)
+langchain-openai>=0.1.0
+
+# Tools
+langchain-tavily>=0.1.0
+
+# Streamlit for web interface
+streamlit>=1.28.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Type checking and code quality
+typing-extensions>=4.8.0
+
+# Additional utilities
+pydantic>=2.0.0
+
+# Development and debugging
+ruff>=0.1.0
+mypy>=1.7.0
