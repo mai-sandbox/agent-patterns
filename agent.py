@@ -189,6 +189,7 @@ def start_form_node(state: FormFillingState) -> Dict[str, Any]:
 def process_section_node(state: FormFillingState) -> Dict[str, Any]:
     """
     Process the current form section with LLM assistance.
+    Enhanced with error handling and retry logic.
     
     Args:
         state: Current form-filling state
@@ -196,22 +197,48 @@ def process_section_node(state: FormFillingState) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: State update with LLM response
     """
-    llm = initialize_llm()
-    current_section = state["current_section"]
-    
-    if not current_section:
-        return {"messages": [AIMessage(content="No current section to process.")]}
-    
-    # Get field definitions for current section
-    section_fields = FORM_FIELDS.get(current_section, {})
-    
-    # Create system prompt for this section
-    field_descriptions = []
-    for field_name, field_config in section_fields.items():
-        required_text = " (required)" if field_config.get("required", False) else " (optional)"
-        field_descriptions.append(f"- {field_name}: {field_config['description']}{required_text}")
-    
-    system_prompt = f"""You are a helpful form-filling assistant. You are currently helping the user fill out the "{current_section.replace('_', ' ')}" section of a form.
+    try:
+        llm = initialize_llm()
+        current_section = state["current_section"]
+        
+        if not current_section:
+            return {
+                "messages": [AIMessage(content="Error: No current section to process. Please restart the form.")],
+                "validation_errors": ["No current section defined"]
+            }
+        
+        # Get field definitions for current section
+        section_fields = FORM_FIELDS.get(current_section, {})
+        
+        if not section_fields:
+            return {
+                "messages": [AIMessage(content=f"Error: Unknown section '{current_section}'. Please contact support.")],
+                "validation_errors": [f"Unknown section: {current_section}"]
+            }
+        
+        # Check for existing data in this section
+        existing_data = state.get("form_data", {}).get(current_section, {})
+        validation_errors = state.get("validation_errors", [])
+        
+        # Create system prompt for this section
+        field_descriptions = []
+        for field_name, field_config in section_fields.items():
+            required_text = " (required)" if field_config.get("required", False) else " (optional)"
+            current_value = existing_data.get(field_name, "")
+            value_text = f" [Current: {current_value}]" if current_value else ""
+            field_descriptions.append(f"- {field_name}: {field_config['description']}{required_text}{value_text}")
+        
+        # Add error context if there are validation errors
+        error_context = ""
+        if validation_errors:
+            error_context = f"\n\nPrevious validation errors to address:\n" + "\n".join(f"- {error}" for error in validation_errors)
+        
+        # Calculate progress
+        progress_pct = get_completion_percentage(state)
+        completed_count = len(state['sections_completed'])
+        total_count = state['total_sections']
+        
+        system_prompt = f"""You are a helpful form-filling assistant. You are currently helping the user fill out the "{current_section.replace('_', ' ')}" section of a form.
 
 The fields for this section are:
 {chr(10).join(field_descriptions)}
@@ -220,19 +247,41 @@ Your task is to:
 1. Ask the user for the required information in a conversational way
 2. Collect all the necessary field values
 3. Once you have collected all the information, use the validate_section_data tool to validate and confirm the data
+4. If there are validation errors, help the user correct them
 
 Be friendly, clear, and help the user understand what information is needed. Ask for one or a few related fields at a time, don't overwhelm them with all fields at once.
 
 Current section: {current_section.replace('_', ' ')}
-Progress: {len(state['sections_completed'])}/{state['total_sections']} sections completed ({get_completion_percentage(state):.1f}%)"""
-    
-    # Prepare messages for LLM
-    messages = [SystemMessage(content=system_prompt)] + state["messages"]
-    
-    # Get LLM response
-    response = llm.invoke(messages)
-    
-    return {"messages": [response]}
+Progress: {completed_count}/{total_count} sections completed ({progress_pct:.1f}%)
+Remaining sections: {', '.join([s for s in state.get('form_data', {}).keys() if s not in state.get('sections_completed', [])])}{error_context}"""
+        
+        # Prepare messages for LLM
+        messages = [SystemMessage(content=system_prompt)] + state["messages"]
+        
+        # Get LLM response with error handling
+        try:
+            response = llm.invoke(messages)
+            return {"messages": [response]}
+        except Exception as llm_error:
+            error_message = AIMessage(
+                content=f"I'm experiencing technical difficulties. Please try again. "
+                       f"If the problem persists, please contact support. (Error: {str(llm_error)[:100]})"
+            )
+            return {
+                "messages": [error_message],
+                "validation_errors": [f"LLM error: {str(llm_error)}"]
+            }
+            
+    except Exception as e:
+        # Comprehensive error handling
+        error_message = AIMessage(
+            content=f"An unexpected error occurred while processing this section. "
+                   f"Please try again or contact support if the issue persists."
+        )
+        return {
+            "messages": [error_message],
+            "validation_errors": [f"Processing error: {str(e)}"]
+        }
 
 
 def validation_node(state: FormFillingState) -> Dict[str, Any]:
@@ -423,3 +472,4 @@ if __name__ == "__main__":
     print("Form-filling agent created successfully!")
     print("Available form sections:", DEFAULT_FORM_SECTIONS)
     print("Use this agent by calling app.stream() or app.invoke() with appropriate config.")
+
