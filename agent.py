@@ -252,10 +252,11 @@ def start_form_node(state: FormFillingState) -> Dict[str, Any]:
     """
     if not state.get("current_section"):
         # Initialize with default sections if not set
-        return create_initial_state(
+        initial_state = create_initial_state(
             DEFAULT_FORM_SECTIONS,
             "I'd like to fill out a form."
         )
+        return dict(initial_state)
     
     # Create welcome message
     welcome_message = AIMessage(
@@ -979,6 +980,7 @@ if __name__ == "__main__":
     print("Form-filling agent created successfully!")
     print("Available form sections:", DEFAULT_FORM_SECTIONS)
     print("Use this agent by calling app.stream() or app.invoke() with appropriate config.")
+
 
 
 
