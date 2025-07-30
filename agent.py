@@ -7,11 +7,11 @@ using checkpointing.
 """
 
 import os
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from dotenv import load_dotenv
 
 from langchain_anthropic import ChatAnthropic
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.messages import AIMessage, SystemMessage
 from langchain_core.tools import tool
 from langchain_core.tools.base import InjectedToolCallId
 from typing_extensions import Annotated
@@ -27,7 +27,6 @@ from state import (
     is_form_complete,
     get_next_section,
     get_completion_percentage,
-    update_section_data,
     mark_section_complete
 )
 
@@ -135,7 +134,7 @@ def validate_section_data(
                     try:
                         int_value = int(str(value))
                         if int_value < 0 and field_name == "years_experience":
-                            validation_errors.append(f"Years of experience cannot be negative")
+                            validation_errors.append("Years of experience cannot be negative")
                         elif int_value > 100 and field_name == "years_experience":
                             warnings.append(f"Years of experience seems unusually high: {int_value}")
                     except ValueError:
@@ -314,7 +313,7 @@ def process_section_node(state: FormFillingState) -> Dict[str, Any]:
         # Add error context if there are validation errors
         error_context = ""
         if validation_errors:
-            error_context = f"\n\nPrevious validation errors to address:\n" + "\n".join(f"- {error}" for error in validation_errors)
+            error_context = "\n\nPrevious validation errors to address:\n" + "\n".join(f"- {error}" for error in validation_errors)
         
         # Calculate progress
         progress_pct = get_completion_percentage(state)
@@ -358,8 +357,8 @@ Remaining sections: {', '.join([s for s in state.get('form_data', {}).keys() if 
     except Exception as e:
         # Comprehensive error handling
         error_message = AIMessage(
-            content=f"An unexpected error occurred while processing this section. "
-                   f"Please try again or contact support if the issue persists."
+            content="An unexpected error occurred while processing this section. "
+                   "Please try again or contact support if the issue persists."
         )
         return {
             "messages": [error_message],
@@ -414,8 +413,8 @@ def validation_node(state: FormFillingState) -> Dict[str, Any]:
     except Exception as e:
         # Error handling for validation node
         error_message = AIMessage(
-            content=f"An error occurred during validation processing. Please try again. "
-                   f"If the issue persists, please contact support."
+            content="An error occurred during validation processing. Please try again. "
+                   "If the issue persists, please contact support."
         )
         return {
             "messages": [error_message],
@@ -518,8 +517,8 @@ def mark_section_complete_node(state: FormFillingState) -> Dict[str, Any]:
     except Exception as e:
         # Comprehensive error handling
         error_message = AIMessage(
-            content=f"⚠️ An error occurred while completing the section. "
-                   f"Please try again or contact support if the issue persists."
+            content="⚠️ An error occurred while completing the section. "
+                   "Please try again or contact support if the issue persists."
         )
         return {
             "messages": [error_message],
@@ -601,7 +600,7 @@ def completion_node(state: FormFillingState) -> Dict[str, Any]:
             "## 📊 **Completion Statistics:**",
             f"• **Sections Completed:** {completed_sections}/{total_sections} (100%)",
             f"• **Fields Completed:** {completed_fields}/{total_fields} ({completion_rate:.1f}%)",
-            f"• **Status:** ✅ **COMPLETE**",
+            "• **Status:** ✅ **COMPLETE**",
             f"• **Form ID:** {hash(str(form_data)) % 10000:04d}",  # Simple form ID
             ""
         ])
@@ -640,9 +639,9 @@ def completion_node(state: FormFillingState) -> Dict[str, Any]:
     except Exception as e:
         # Error handling for completion node
         error_message = AIMessage(
-            content=f"⚠️ An error occurred while generating the form completion summary. "
-                   f"However, your form data has been saved successfully. "
-                   f"Please contact support if you need assistance."
+            content="⚠️ An error occurred while generating the form completion summary. "
+                   "However, your form data has been saved successfully. "
+                   "Please contact support if you need assistance."
         )
         return {
             "messages": [error_message],
@@ -698,7 +697,7 @@ def should_continue(state: FormFillingState) -> str:
         # Default to completion if no sections to process
         return "completion"
         
-    except Exception as e:
+    except Exception:
         # Error in workflow control - default to processing
         return "process_section"
 
@@ -806,7 +805,7 @@ def get_form_progress_summary(state: FormFillingState) -> str:
         
         # Build progress summary
         summary_parts = [
-            f"📊 **Form Progress Summary**",
+            "📊 **Form Progress Summary**",
             f"• Overall Progress: {len(completed_sections)}/{total_sections} sections ({completion_pct:.1f}%)",
             f"• Fields Completed: {completed_fields}/{total_fields}",
             f"• Current Section: {current_section.replace('_', ' ').title() if current_section else 'None'}",

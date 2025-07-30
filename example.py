@@ -9,11 +9,11 @@ section by section with human-in-the-loop validation and persistent memory.
 import asyncio
 import os
 import sys
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from dotenv import load_dotenv
 
 from agent import app, DEFAULT_FORM_SECTIONS, FORM_FIELDS
-from state import FormFillingState, create_initial_state, get_completion_percentage
+from state import FormFillingState, get_completion_percentage
 
 
 def print_banner():
@@ -108,7 +108,7 @@ def handle_human_input(interrupt_data: Dict[str, Any]) -> Dict[str, Any]:
                 if not field_name.startswith("_"):
                     current_value = data[field_name]
                     print(f"\nCurrent {field_name.replace('_', ' ')}: {current_value}")
-                    new_value = input(f"New value (press Enter to keep current): ").strip()
+                    new_value = input("New value (press Enter to keep current): ").strip()
                     
                     if new_value:
                         # Try to convert to appropriate type
@@ -231,7 +231,7 @@ def run_simple_example():
         if "messages" in result:
             latest_message = result["messages"][-1]
             if hasattr(latest_message, 'content'):
-                print(f"\n🤖 **Agent Response:**")
+                print("\n🤖 **Agent Response:**")
                 print(latest_message.content)
         
         # Print current state
