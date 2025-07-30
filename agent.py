@@ -425,7 +425,7 @@ def validation_node(state: FormFillingState) -> Dict[str, Any]:
 
 def mark_section_complete_node(state: FormFillingState) -> Dict[str, Any]:
     """
-    Mark the current section as complete and move to next section.
+    Enhanced section completion node with comprehensive progress tracking and error handling.
     
     Args:
         state: Current form-filling state
@@ -433,29 +433,98 @@ def mark_section_complete_node(state: FormFillingState) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: State update marking section complete
     """
-    current_section = state["current_section"]
-    
-    if not current_section:
-        return {"messages": [AIMessage(content="No section to mark as complete.")]}
-    
-    # Mark section as complete
-    state_update = mark_section_complete(state, current_section)
-    
-    # Add completion message
-    next_section = state_update.get("current_section")
-    if next_section:
-        completion_message = AIMessage(
-            content=f"Great! The {current_section.replace('_', ' ')} section is now complete. "
-                   f"Let's move on to the {next_section.replace('_', ' ')} section."
+    try:
+        current_section = state.get("current_section", "")
+        
+        if not current_section:
+            error_message = AIMessage(
+                content="⚠️ Error: No section to mark as complete. Please restart the form process."
+            )
+            return {
+                "messages": [error_message],
+                "validation_errors": ["No current section to complete"]
+            }
+        
+        # Validate that the section has required data
+        section_data = state.get("form_data", {}).get(current_section, {})
+        section_fields = FORM_FIELDS.get(current_section, {})
+        
+        # Check for missing required fields
+        missing_required = []
+        for field_name, field_config in section_fields.items():
+            if field_config.get("required", False) and not section_data.get(field_name):
+                missing_required.append(field_name)
+        
+        if missing_required:
+            error_message = AIMessage(
+                content=f"⚠️ Cannot complete {current_section.replace('_', ' ')} section. "
+                       f"Missing required fields: {', '.join(missing_required)}. "
+                       f"Please provide the missing information."
+            )
+            return {
+                "messages": [error_message],
+                "validation_errors": [f"Missing required fields: {', '.join(missing_required)}"]
+            }
+        
+        # Mark section as complete using the state utility function
+        state_update = mark_section_complete(state, current_section)
+        
+        # Calculate updated progress
+        new_completed_count = len(state_update.get("sections_completed", []))
+        total_count = state.get("total_sections", 0)
+        progress_pct = (new_completed_count / total_count) * 100 if total_count > 0 else 100
+        
+        # Get next section info
+        next_section = state_update.get("current_section")
+        
+        # Create detailed completion message
+        if next_section:
+            # More sections to go
+            remaining_sections = [s for s in state.get('form_data', {}).keys() 
+                                if s not in state_update.get("sections_completed", [])]
+            
+            completion_message = AIMessage(
+                content=f"✅ Excellent! The **{current_section.replace('_', ' ').title()}** section is now complete!\n\n"
+                       f"📊 **Progress Update:**\n"
+                       f"• Completed: {new_completed_count}/{total_count} sections ({progress_pct:.1f}%)\n"
+                       f"• Next: {next_section.replace('_', ' ').title()}\n"
+                       f"• Remaining: {', '.join([s.replace('_', ' ').title() for s in remaining_sections])}\n\n"
+                       f"🚀 Let's continue with the {next_section.replace('_', ' ')} section!"
+            )
+        else:
+            # All sections complete
+            completion_message = AIMessage(
+                content=f"🎉 **Fantastic!** The **{current_section.replace('_', ' ').title()}** section is complete!\n\n"
+                       f"📊 **Final Progress:**\n"
+                       f"• All {total_count} sections completed (100%)\n"
+                       f"• Form is ready for final review!\n\n"
+                       f"✨ Proceeding to form completion and summary..."
+            )
+        
+        # Add completion timestamp and metadata
+        state_update["messages"] = [completion_message]
+        state_update["validation_errors"] = None  # Clear any previous errors
+        
+        # Add completion metadata
+        if "form_data" not in state_update:
+            state_update["form_data"] = state.get("form_data", {})
+        
+        # Add completion timestamp to the section data
+        if current_section in state_update["form_data"]:
+            state_update["form_data"][current_section]["_completed_at"] = "completed"
+        
+        return state_update
+        
+    except Exception as e:
+        # Comprehensive error handling
+        error_message = AIMessage(
+            content=f"⚠️ An error occurred while completing the section. "
+                   f"Please try again or contact support if the issue persists."
         )
-    else:
-        completion_message = AIMessage(
-            content=f"Excellent! The {current_section.replace('_', ' ')} section is complete. "
-                   f"All sections are now finished!"
-        )
-    
-    state_update["messages"] = [completion_message]
-    return state_update
+        return {
+            "messages": [error_message],
+            "validation_errors": [f"Section completion error: {str(e)}"]
+        }
 
 
 def completion_node(state: FormFillingState) -> Dict[str, Any]:
@@ -596,6 +665,7 @@ if __name__ == "__main__":
     print("Form-filling agent created successfully!")
     print("Available form sections:", DEFAULT_FORM_SECTIONS)
     print("Use this agent by calling app.stream() or app.invoke() with appropriate config.")
+
 
 
 
