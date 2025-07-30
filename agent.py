@@ -631,8 +631,9 @@ def completion_node(state: FormFillingState) -> Dict[str, Any]:
         updated_form_data = form_data.copy()
         for section_name in updated_form_data:
             if section_name in state.get("sections_completed", []):
-                updated_form_data[section_name]["_form_completed"] = True
-                updated_form_data[section_name]["_completion_rate"] = completion_rate
+                if isinstance(updated_form_data[section_name], dict):
+                    updated_form_data[section_name]["_form_completed"] = True
+                    updated_form_data[section_name]["_completion_rate"] = completion_rate
         
         final_state_update["form_data"] = updated_form_data
         
@@ -981,6 +982,7 @@ if __name__ == "__main__":
     print("Form-filling agent created successfully!")
     print("Available form sections:", DEFAULT_FORM_SECTIONS)
     print("Use this agent by calling app.stream() or app.invoke() with appropriate config.")
+
 
 
 
