@@ -1,0 +1,21 @@
+{
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "agent": "./agent.py:app"
+  },
+  "env": "./.env",
+  "assistant_config_schema": {
+    "type": "object",
+    "properties": {
+      "system_prompt": {
+        "type": "string",
+        "description": "The system prompt that defines the agent's behavior and personality",
+        "default": "You are a helpful AI assistant with access to web search. Use the search tool when you need current information or facts that might not be in your training data."
+      }
+    },
+    "required": [],
+    "additionalProperties": false
+  }
+}
