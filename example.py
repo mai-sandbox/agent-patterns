@@ -114,11 +114,11 @@ def handle_human_input(interrupt_data: Dict[str, Any]) -> Dict[str, Any]:
                         # Try to convert to appropriate type
                         if field_name == "years_experience":
                             try:
-                                corrections[field_name] = int(new_value)
+                                corrections[field_name] = int(new_value)  # type: ignore
                             except ValueError:
-                                corrections[field_name] = new_value
+                                corrections[field_name] = new_value  # type: ignore
                         elif field_name == "newsletter":
-                            corrections[field_name] = new_value.lower() in ["yes", "y", "true", "1"]
+                            corrections[field_name] = new_value.lower() in ["yes", "y", "true", "1"]  # type: ignore
                         else:
                             corrections[field_name] = new_value
             
@@ -269,4 +269,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
