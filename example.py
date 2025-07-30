@@ -120,7 +120,7 @@ def handle_human_input(interrupt_data: Dict[str, Any]) -> Dict[str, Any]:
                         elif field_name == "newsletter":
                             corrections[field_name] = new_value.lower() in ["yes", "y", "true", "1"]  # type: ignore
                         else:
-                            corrections[field_name] = new_value
+                            corrections[field_name] = new_value  # type: ignore
             
             feedback = input("\nAny additional feedback (optional): ").strip()
             feedback_list = [feedback] if feedback else []
@@ -269,5 +269,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
