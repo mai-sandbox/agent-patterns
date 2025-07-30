@@ -208,9 +208,10 @@ def validate_section_data(
         
         elif human_response.get("action", "").lower() == "skip_section":
             # Skip this section (mark as complete but with warnings)
-            state_update = {
+            skip_message = f"Section skipped by user with {len(validation_errors)} validation errors"
+            state_update: Dict[str, Any] = {
                 "form_data": {section_name: field_data},
-                "validation_errors": [f"Section skipped by user with {len(validation_errors)} validation errors"],
+                "validation_errors": [skip_message],
                 "current_field": None
             }
             return Command(update=state_update, goto="mark_section_complete")
@@ -980,6 +981,7 @@ if __name__ == "__main__":
     print("Form-filling agent created successfully!")
     print("Available form sections:", DEFAULT_FORM_SECTIONS)
     print("Use this agent by calling app.stream() or app.invoke() with appropriate config.")
+
 
 
 
