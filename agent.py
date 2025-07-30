@@ -652,24 +652,243 @@ def completion_node(state: FormFillingState) -> Dict[str, Any]:
 
 def should_continue(state: FormFillingState) -> str:
     """
-    Determine the next node based on current state.
+    Enhanced workflow control function with comprehensive state analysis.
     
     Args:
         state: Current form-filling state
         
     Returns:
-        str: Next node name
+        str: Next node name based on current state
     """
-    # Check if form is complete
-    if is_form_complete(state):
+    try:
+        # Check for critical errors that require restart
+        validation_errors = state.get("validation_errors", [])
+        if validation_errors:
+            critical_errors = [e for e in validation_errors if "error" in e.lower() or "restart" in e.lower()]
+            if critical_errors:
+                return "process_section"  # Return to processing to handle errors
+        
+        # Check if form is complete
+        if is_form_complete(state):
+            return "completion"
+        
+        # Check if we have a current section to process
+        current_section = state.get("current_section", "")
+        if current_section:
+            # Check if current section has validation errors
+            if validation_errors:
+                return "process_section"  # Stay in processing to fix errors
+            
+            # Check if current section is already completed
+            if current_section in state.get("sections_completed", []):
+                # Move to next section
+                next_section = get_next_section(state)
+                if next_section:
+                    return "process_section"
+                else:
+                    return "completion"
+            
+            return "process_section"
+        
+        # No current section - try to find next section
+        next_section = get_next_section(state)
+        if next_section:
+            return "process_section"
+        
+        # Default to completion if no sections to process
         return "completion"
-    
-    # Check if we have a current section to process
-    if state.get("current_section"):
+        
+    except Exception as e:
+        # Error in workflow control - default to processing
         return "process_section"
+
+
+def handle_form_errors(state: FormFillingState) -> Dict[str, Any]:
+    """
+    Enhanced error handling and recovery function.
     
-    # Default to completion if no current section
-    return "completion"
+    Args:
+        state: Current form-filling state
+        
+    Returns:
+        Dict[str, Any]: State update with error handling
+    """
+    validation_errors = state.get("validation_errors", [])
+    current_section = state.get("current_section", "")
+    
+    if not validation_errors:
+        return {"messages": [AIMessage(content="No errors to handle.")]}
+    
+    # Categorize errors
+    critical_errors = []
+    field_errors = []
+    warning_errors = []
+    
+    for error in validation_errors:
+        error_lower = error.lower()
+        if any(keyword in error_lower for keyword in ["critical", "restart", "fatal", "unknown section"]):
+            critical_errors.append(error)
+        elif any(keyword in error_lower for keyword in ["missing", "invalid", "required"]):
+            field_errors.append(error)
+        else:
+            warning_errors.append(error)
+    
+    # Handle critical errors
+    if critical_errors:
+        error_message = AIMessage(
+            content=f"🚨 **Critical Error Detected**\n\n"
+                   f"The following critical issues need to be resolved:\n"
+                   f"{chr(10).join(f'• {error}' for error in critical_errors)}\n\n"
+                   f"Please restart the form or contact support for assistance."
+        )
+        return {
+            "messages": [error_message],
+            "current_section": "",
+            "current_field": None
+        }
+    
+    # Handle field errors
+    if field_errors:
+        error_message = AIMessage(
+            content=f"⚠️ **Field Validation Issues**\n\n"
+                   f"Please correct the following issues in the {current_section.replace('_', ' ')} section:\n"
+                   f"{chr(10).join(f'• {error}' for error in field_errors)}\n\n"
+                   f"I'll help you provide the correct information."
+        )
+        return {
+            "messages": [error_message],
+            "validation_errors": field_errors  # Keep field errors for processing
+        }
+    
+    # Handle warnings
+    if warning_errors:
+        warning_message = AIMessage(
+            content=f"ℹ️ **Notices**\n\n"
+                   f"{chr(10).join(f'• {error}' for error in warning_errors)}\n\n"
+                   f"These are informational messages. You can continue with the form."
+        )
+        return {
+            "messages": [warning_message],
+            "validation_errors": None  # Clear warnings
+        }
+    
+    return {"messages": [AIMessage(content="Error handling complete.")]}
+
+
+def get_form_progress_summary(state: FormFillingState) -> str:
+    """
+    Generate a detailed progress summary for the current form state.
+    
+    Args:
+        state: Current form-filling state
+        
+    Returns:
+        str: Formatted progress summary
+    """
+    try:
+        completed_sections = state.get("sections_completed", [])
+        total_sections = state.get("total_sections", 0)
+        current_section = state.get("current_section", "")
+        form_data = state.get("form_data", {})
+        
+        # Calculate overall progress
+        completion_pct = get_completion_percentage(state)
+        
+        # Count total fields and completed fields
+        total_fields = 0
+        completed_fields = 0
+        
+        for section_name, section_fields in FORM_FIELDS.items():
+            total_fields += len(section_fields)
+            section_data = form_data.get(section_name, {})
+            completed_fields += len([f for f, v in section_data.items() 
+                                   if v and not f.startswith("_")])
+        
+        # Build progress summary
+        summary_parts = [
+            f"📊 **Form Progress Summary**",
+            f"• Overall Progress: {len(completed_sections)}/{total_sections} sections ({completion_pct:.1f}%)",
+            f"• Fields Completed: {completed_fields}/{total_fields}",
+            f"• Current Section: {current_section.replace('_', ' ').title() if current_section else 'None'}",
+            ""
+        ]
+        
+        # Add section-by-section breakdown
+        summary_parts.append("**Section Status:**")
+        for section_name in form_data.keys():
+            if section_name in completed_sections:
+                status = "✅ Complete"
+            elif section_name == current_section:
+                status = "🔄 In Progress"
+            else:
+                status = "⏳ Pending"
+            
+            section_data = form_data.get(section_name, {})
+            field_count = len([f for f, v in section_data.items() if v and not f.startswith("_")])
+            total_section_fields = len(FORM_FIELDS.get(section_name, {}))
+            
+            summary_parts.append(f"• {section_name.replace('_', ' ').title()}: {status} ({field_count}/{total_section_fields} fields)")
+        
+        return "\n".join(summary_parts)
+        
+    except Exception as e:
+        return f"Error generating progress summary: {str(e)}"
+
+
+def validate_form_integrity(state: FormFillingState) -> List[str]:
+    """
+    Perform comprehensive form integrity validation.
+    
+    Args:
+        state: Current form-filling state
+        
+    Returns:
+        List[str]: List of integrity issues found
+    """
+    issues = []
+    
+    try:
+        form_data = state.get("form_data", {})
+        completed_sections = state.get("sections_completed", [])
+        current_section = state.get("current_section", "")
+        total_sections = state.get("total_sections", 0)
+        
+        # Check basic state integrity
+        if not form_data:
+            issues.append("Form data is empty or missing")
+        
+        if total_sections <= 0:
+            issues.append("Invalid total sections count")
+        
+        if len(form_data) != total_sections:
+            issues.append(f"Form data sections ({len(form_data)}) don't match total sections ({total_sections})")
+        
+        # Check section integrity
+        for section_name in form_data.keys():
+            if section_name not in FORM_FIELDS:
+                issues.append(f"Unknown section in form data: {section_name}")
+        
+        # Check completed sections integrity
+        for section_name in completed_sections:
+            if section_name not in form_data:
+                issues.append(f"Completed section not in form data: {section_name}")
+            
+            # Check if completed section has required fields
+            section_data = form_data.get(section_name, {})
+            section_fields = FORM_FIELDS.get(section_name, {})
+            
+            for field_name, field_config in section_fields.items():
+                if field_config.get("required", False) and not section_data.get(field_name):
+                    issues.append(f"Completed section '{section_name}' missing required field: {field_name}")
+        
+        # Check current section validity
+        if current_section and current_section not in form_data:
+            issues.append(f"Current section not in form data: {current_section}")
+        
+        return issues
+        
+    except Exception as e:
+        return [f"Error during integrity validation: {str(e)}"]
 
 
 def create_form_filling_graph() -> StateGraph:
@@ -761,6 +980,7 @@ if __name__ == "__main__":
     print("Form-filling agent created successfully!")
     print("Available form sections:", DEFAULT_FORM_SECTIONS)
     print("Use this agent by calling app.stream() or app.invoke() with appropriate config.")
+
 
 
 
