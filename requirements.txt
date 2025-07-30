@@ -1,0 +1,35 @@
+# Core LangGraph and LangChain dependencies
+langgraph>=0.2.0
+langgraph-sdk>=0.1.0
+langchain>=0.2.0
+langchain-core>=0.2.0
+
+# LLM Provider - Anthropic (preferred)
+langchain-anthropic>=0.1.0
+
+# Alternative LLM Provider - OpenAI (if needed)
+langchain-openai>=0.1.0
+
+# Tools and integrations
+langchain-tavily>=0.1.0
+
+# Streamlit for web interface
+streamlit>=1.28.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Type checking and development tools
+typing-extensions>=4.8.0
+
+# Additional utilities that may be needed
+pydantic>=2.0.0
+httpx>=0.25.0
+
+# Development and code quality tools (optional but recommended)
+ruff>=0.1.0
+mypy>=1.7.0
+
+# Async support for better performance
+nest-asyncio>=1.5.0
+
