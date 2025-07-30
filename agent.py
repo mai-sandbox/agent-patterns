@@ -92,7 +92,7 @@ def validate_section_data(
     section_name: str,
     field_data: Dict[str, Any],
     tool_call_id: Annotated[str, InjectedToolCallId]
-) -> str:
+) -> Command:
     """
     Enhanced validation tool with comprehensive error handling and retry logic.
     
@@ -979,6 +979,7 @@ if __name__ == "__main__":
     print("Form-filling agent created successfully!")
     print("Available form sections:", DEFAULT_FORM_SECTIONS)
     print("Use this agent by calling app.stream() or app.invoke() with appropriate config.")
+
 
 
 
