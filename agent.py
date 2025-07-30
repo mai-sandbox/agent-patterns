@@ -95,7 +95,7 @@ def validate_section_data(
     tool_call_id: Annotated[str, InjectedToolCallId]
 ) -> str:
     """
-    Validate form data for a specific section and request human confirmation.
+    Enhanced validation tool with comprehensive error handling and retry logic.
     
     Args:
         section_name: Name of the form section
@@ -105,55 +105,138 @@ def validate_section_data(
     Returns:
         str: Validation result message
     """
-    # Get field definitions for this section
-    section_fields = FORM_FIELDS.get(section_name, {})
-    
-    # Validate required fields
-    validation_errors = []
-    for field_name, field_config in section_fields.items():
-        if field_config.get("required", False) and field_name not in field_data:
-            validation_errors.append(f"Missing required field: {field_name}")
-        elif field_name in field_data:
-            # Basic type validation
-            value = field_data[field_name]
-            expected_type = field_config.get("type", "str")
-            
-            if expected_type == "int" and not isinstance(value, int):
-                try:
-                    int(str(value))
-                except ValueError:
-                    validation_errors.append(f"Field '{field_name}' must be a number")
-            elif expected_type == "bool" and not isinstance(value, bool):
-                if str(value).lower() not in ["true", "false", "yes", "no", "1", "0"]:
-                    validation_errors.append(f"Field '{field_name}' must be yes/no or true/false")
-    
-    # Prepare data for human review
-    review_data = {
-        "section": section_name,
-        "data": field_data,
-        "validation_errors": validation_errors,
-        "question": f"Please review the {section_name.replace('_', ' ')} section data. Is this correct?"
-    }
-    
-    # Request human validation
-    human_response = interrupt(review_data)
-    
-    # Process human response
-    if human_response.get("approved", "").lower() in ["yes", "y", "true", "1"]:
-        # Data approved - update state
-        state_update = {
-            "form_data": {section_name: field_data},
-            "validation_errors": None
-        }
-        return Command(update=state_update, goto="mark_section_complete")
-    else:
-        # Data needs correction
-        corrections = human_response.get("corrections", {})
-        corrected_data = {**field_data, **corrections}
+    try:
+        # Get field definitions for this section
+        section_fields = FORM_FIELDS.get(section_name, {})
         
+        if not section_fields:
+            return Command(update={
+                "validation_errors": [f"Unknown section: {section_name}"]
+            }, goto="process_section")
+        
+        # Enhanced validation with detailed error messages
+        validation_errors = []
+        warnings = []
+        
+        # Check required fields
+        for field_name, field_config in section_fields.items():
+            if field_config.get("required", False):
+                if field_name not in field_data or not field_data[field_name]:
+                    validation_errors.append(f"Missing required field: {field_name} ({field_config['description']})")
+        
+        # Validate field types and formats
+        for field_name, value in field_data.items():
+            if field_name in section_fields:
+                field_config = section_fields[field_name]
+                expected_type = field_config.get("type", "str")
+                
+                # Type validation with conversion attempts
+                if expected_type == "int":
+                    try:
+                        int_value = int(str(value))
+                        if int_value < 0 and field_name == "years_experience":
+                            validation_errors.append(f"Years of experience cannot be negative")
+                        elif int_value > 100 and field_name == "years_experience":
+                            warnings.append(f"Years of experience seems unusually high: {int_value}")
+                    except ValueError:
+                        validation_errors.append(f"Field '{field_name}' must be a valid number, got: {value}")
+                
+                elif expected_type == "bool":
+                    if str(value).lower() not in ["true", "false", "yes", "no", "1", "0"]:
+                        validation_errors.append(f"Field '{field_name}' must be yes/no or true/false, got: {value}")
+                
+                elif expected_type == "str":
+                    # Email validation
+                    if field_name == "email" and "@" not in str(value):
+                        validation_errors.append(f"Email address appears invalid: {value}")
+                    # Phone validation (basic)
+                    elif field_name == "phone" and len(str(value).replace(" ", "").replace("-", "").replace("(", "").replace(")", "")) < 10:
+                        validation_errors.append(f"Phone number appears too short: {value}")
+                    # Postal code validation (basic)
+                    elif field_name == "postal_code" and len(str(value)) < 5:
+                        validation_errors.append(f"Postal code appears invalid: {value}")
+        
+        # Calculate completion score
+        total_fields = len(section_fields)
+        completed_fields = len([f for f in field_data.values() if f])
+        completion_score = (completed_fields / total_fields) * 100 if total_fields > 0 else 0
+        
+        # Prepare enhanced data for human review
+        review_data = {
+            "section": section_name,
+            "section_display_name": section_name.replace('_', ' ').title(),
+            "data": field_data,
+            "validation_errors": validation_errors,
+            "warnings": warnings,
+            "completion_score": completion_score,
+            "total_fields": total_fields,
+            "completed_fields": completed_fields,
+            "question": f"Please review the {section_name.replace('_', ' ')} section data. Is this correct?",
+            "retry_count": field_data.get("_retry_count", 0)
+        }
+        
+        # Request human validation with enhanced context
+        human_response = interrupt(review_data)
+        
+        # Process human response with retry logic
+        retry_count = field_data.get("_retry_count", 0)
+        
+        if human_response.get("approved", "").lower() in ["yes", "y", "true", "1", "approve", "correct"]:
+            # Data approved - clean up retry count and update state
+            clean_data = {k: v for k, v in field_data.items() if not k.startswith("_")}
+            state_update = {
+                "form_data": {section_name: clean_data},
+                "validation_errors": None,
+                "current_field": None
+            }
+            return Command(update=state_update, goto="mark_section_complete")
+        
+        elif human_response.get("action", "").lower() == "retry" and retry_count < 3:
+            # Retry with corrections
+            corrections = human_response.get("corrections", {})
+            feedback = human_response.get("feedback", [])
+            
+            # Merge corrections with existing data
+            corrected_data = {**field_data, **corrections}
+            corrected_data["_retry_count"] = retry_count + 1
+            
+            state_update = {
+                "form_data": {section_name: corrected_data},
+                "validation_errors": feedback,
+                "current_field": human_response.get("focus_field")
+            }
+            return Command(update=state_update, goto="process_section")
+        
+        elif human_response.get("action", "").lower() == "skip_section":
+            # Skip this section (mark as complete but with warnings)
+            state_update = {
+                "form_data": {section_name: field_data},
+                "validation_errors": [f"Section skipped by user with {len(validation_errors)} validation errors"],
+                "current_field": None
+            }
+            return Command(update=state_update, goto="mark_section_complete")
+        
+        else:
+            # Too many retries or user wants to restart section
+            if retry_count >= 3:
+                feedback = ["Maximum retry attempts reached. Please restart this section."]
+            else:
+                feedback = human_response.get("feedback", ["User requested section restart"])
+            
+            # Reset section data
+            state_update = {
+                "form_data": {section_name: {}},
+                "validation_errors": feedback,
+                "current_field": None
+            }
+            return Command(update=state_update, goto="process_section")
+            
+    except Exception as e:
+        # Comprehensive error handling for validation tool
+        error_msg = f"Validation error: {str(e)}"
         state_update = {
-            "form_data": {section_name: corrected_data},
-            "validation_errors": human_response.get("feedback", [])
+            "validation_errors": [error_msg],
+            "current_field": None
         }
         return Command(update=state_update, goto="process_section")
 
@@ -472,4 +555,5 @@ if __name__ == "__main__":
     print("Form-filling agent created successfully!")
     print("Available form sections:", DEFAULT_FORM_SECTIONS)
     print("Use this agent by calling app.stream() or app.invoke() with appropriate config.")
+
 
