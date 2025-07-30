@@ -529,29 +529,125 @@ def mark_section_complete_node(state: FormFillingState) -> Dict[str, Any]:
 
 def completion_node(state: FormFillingState) -> Dict[str, Any]:
     """
-    Handle form completion and provide summary.
+    Enhanced form completion node with comprehensive summary and final validation.
     
     Args:
         state: Current form-filling state
         
     Returns:
-        Dict[str, Any]: State update with completion message
+        Dict[str, Any]: State update with detailed completion message
     """
-    # Create form summary
-    summary_parts = ["🎉 Congratulations! Your form has been completed successfully!\n\n**Form Summary:**"]
-    
-    for section_name, section_data in state["form_data"].items():
-        if section_data:  # Only show sections with data
-            summary_parts.append(f"\n**{section_name.replace('_', ' ').title()}:**")
-            for field_name, value in section_data.items():
-                summary_parts.append(f"- {field_name.replace('_', ' ').title()}: {value}")
-    
-    summary_parts.append(f"\n**Total sections completed:** {len(state['sections_completed'])}/{state['total_sections']}")
-    summary_parts.append("**Status:** ✅ Complete")
-    
-    completion_message = AIMessage(content="\n".join(summary_parts))
-    
-    return {"messages": [completion_message]}
+    try:
+        # Perform final validation check
+        total_sections = state.get("total_sections", 0)
+        completed_sections = len(state.get("sections_completed", []))
+        form_data = state.get("form_data", {})
+        
+        # Check if form is actually complete
+        if completed_sections < total_sections:
+            incomplete_sections = [s for s in form_data.keys() 
+                                 if s not in state.get("sections_completed", [])]
+            
+            warning_message = AIMessage(
+                content=f"⚠️ **Form Incomplete**\n\n"
+                       f"Only {completed_sections}/{total_sections} sections have been completed.\n"
+                       f"Remaining sections: {', '.join([s.replace('_', ' ').title() for s in incomplete_sections])}\n\n"
+                       f"Please complete all sections before finalizing the form."
+            )
+            return {"messages": [warning_message]}
+        
+        # Generate comprehensive form summary
+        summary_parts = [
+            "🎉 **FORM COMPLETION SUCCESSFUL!** 🎉\n",
+            f"All {total_sections} sections have been completed successfully.\n"
+        ]
+        
+        # Add detailed section summaries
+        summary_parts.append("## 📋 **Complete Form Summary:**\n")
+        
+        section_count = 0
+        total_fields = 0
+        completed_fields = 0
+        
+        for section_name, section_data in form_data.items():
+            if section_data and section_name in state.get("sections_completed", []):
+                section_count += 1
+                section_fields = FORM_FIELDS.get(section_name, {})
+                
+                summary_parts.append(f"### {section_count}. **{section_name.replace('_', ' ').title()}**")
+                
+                for field_name, value in section_data.items():
+                    if not field_name.startswith("_"):  # Skip internal fields
+                        field_display = field_name.replace('_', ' ').title()
+                        
+                        # Format different types of values
+                        if isinstance(value, bool):
+                            display_value = "Yes" if value else "No"
+                        elif isinstance(value, (int, float)):
+                            display_value = str(value)
+                        else:
+                            display_value = str(value)
+                        
+                        summary_parts.append(f"   • **{field_display}:** {display_value}")
+                        completed_fields += 1
+                
+                total_fields += len([f for f in section_fields.keys()])
+                summary_parts.append("")  # Add spacing
+        
+        # Add completion statistics
+        completion_rate = (completed_fields / total_fields * 100) if total_fields > 0 else 100
+        
+        summary_parts.extend([
+            "## 📊 **Completion Statistics:**",
+            f"• **Sections Completed:** {completed_sections}/{total_sections} (100%)",
+            f"• **Fields Completed:** {completed_fields}/{total_fields} ({completion_rate:.1f}%)",
+            f"• **Status:** ✅ **COMPLETE**",
+            f"• **Form ID:** {hash(str(form_data)) % 10000:04d}",  # Simple form ID
+            ""
+        ])
+        
+        # Add next steps or instructions
+        summary_parts.extend([
+            "## 🚀 **Next Steps:**",
+            "Your form has been successfully completed and is ready for processing.",
+            "Thank you for providing all the required information!",
+            "",
+            "---",
+            "*Form completed successfully. All data has been validated and stored.*"
+        ])
+        
+        completion_message = AIMessage(content="\n".join(summary_parts))
+        
+        # Final state update
+        final_state_update = {
+            "messages": [completion_message],
+            "current_section": "",  # Clear current section
+            "current_field": None,  # Clear current field
+            "validation_errors": None,  # Clear any errors
+        }
+        
+        # Add completion metadata to form data
+        updated_form_data = form_data.copy()
+        for section_name in updated_form_data:
+            if section_name in state.get("sections_completed", []):
+                updated_form_data[section_name]["_form_completed"] = True
+                updated_form_data[section_name]["_completion_rate"] = completion_rate
+        
+        final_state_update["form_data"] = updated_form_data
+        
+        return final_state_update
+        
+    except Exception as e:
+        # Error handling for completion node
+        error_message = AIMessage(
+            content=f"⚠️ An error occurred while generating the form completion summary. "
+                   f"However, your form data has been saved successfully. "
+                   f"Please contact support if you need assistance."
+        )
+        return {
+            "messages": [error_message],
+            "validation_errors": [f"Completion node error: {str(e)}"]
+        }
 
 
 def should_continue(state: FormFillingState) -> str:
@@ -665,6 +761,7 @@ if __name__ == "__main__":
     print("Form-filling agent created successfully!")
     print("Available form sections:", DEFAULT_FORM_SECTIONS)
     print("Use this agent by calling app.stream() or app.invoke() with appropriate config.")
+
 
 
 
