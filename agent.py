@@ -369,7 +369,7 @@ Remaining sections: {', '.join([s for s in state.get('form_data', {}).keys() if 
 
 def validation_node(state: FormFillingState) -> Dict[str, Any]:
     """
-    Handle validation results and determine next steps.
+    Enhanced validation node with comprehensive error handling and progress tracking.
     
     Args:
         state: Current form-filling state
@@ -377,9 +377,50 @@ def validation_node(state: FormFillingState) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: State update based on validation results
     """
-    # This node processes the results from the validate_section_data tool
-    # The actual validation logic is handled in the tool itself
-    return {"messages": [AIMessage(content="Processing validation results...")]}
+    try:
+        current_section = state.get("current_section", "")
+        validation_errors = state.get("validation_errors", [])
+        
+        # Check if there are validation errors to handle
+        if validation_errors:
+            error_count = len(validation_errors)
+            error_summary = f"Found {error_count} validation issue{'s' if error_count != 1 else ''} in the {current_section.replace('_', ' ')} section."
+            
+            # Create detailed error message
+            error_details = "\n".join(f"• {error}" for error in validation_errors)
+            
+            validation_message = AIMessage(
+                content=f"⚠️ {error_summary}\n\nIssues to address:\n{error_details}\n\n"
+                       f"Please provide the corrected information, and I'll help you fix these issues."
+            )
+            
+            return {
+                "messages": [validation_message],
+                "current_field": None  # Reset current field focus
+            }
+        
+        # No validation errors - processing successful
+        progress_pct = get_completion_percentage(state)
+        completed_count = len(state.get('sections_completed', []))
+        total_count = state.get('total_sections', 0)
+        
+        success_message = AIMessage(
+            content=f"✅ Validation successful! Processing complete for the {current_section.replace('_', ' ')} section.\n"
+                   f"Progress: {completed_count}/{total_count} sections completed ({progress_pct:.1f}%)"
+        )
+        
+        return {"messages": [success_message]}
+        
+    except Exception as e:
+        # Error handling for validation node
+        error_message = AIMessage(
+            content=f"An error occurred during validation processing. Please try again. "
+                   f"If the issue persists, please contact support."
+        )
+        return {
+            "messages": [error_message],
+            "validation_errors": [f"Validation node error: {str(e)}"]
+        }
 
 
 def mark_section_complete_node(state: FormFillingState) -> Dict[str, Any]:
@@ -555,5 +596,6 @@ if __name__ == "__main__":
     print("Form-filling agent created successfully!")
     print("Available form sections:", DEFAULT_FORM_SECTIONS)
     print("Use this agent by calling app.stream() or app.invoke() with appropriate config.")
+
 
 
