@@ -81,8 +81,8 @@ def initialize_llm() -> ChatAnthropic:
         )
     
     return ChatAnthropic(
-        model="claude-3-5-sonnet-20241022",
-        api_key=api_key,
+        model_name="claude-3-5-sonnet-20241022",
+        anthropic_api_key=api_key,
         temperature=0.1
     )
 
@@ -979,6 +979,7 @@ if __name__ == "__main__":
     print("Form-filling agent created successfully!")
     print("Available form sections:", DEFAULT_FORM_SECTIONS)
     print("Use this agent by calling app.stream() or app.invoke() with appropriate config.")
+
 
 
 
