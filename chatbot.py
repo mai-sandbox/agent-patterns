@@ -44,7 +44,7 @@ class Agent:
         return END
 
 if __name__ == "__main__":
-    model = ChatAnthropic(model="claude-3-haiku-20240307")
+    model = ChatAnthropic(model_name="claude-3-haiku-20240307")
     checkpointer = SqliteSaver.from_conn_string(":memory:")
     agent = Agent(model, checkpointer)
     runnable = agent.get_runnable()
