@@ -1,10 +1,11 @@
 import os
-from typing import Annotated
+import operator
+from typing import Annotated, TypedDict
 
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import AnyMessage, SystemMessage, ToolMessage
 from langgraph.graph import END, StateGraph
-from langgraph.checkpoint.sqlite import SqliteSaver
+
 
 
 class AgentState(TypedDict):
@@ -26,4 +27,13 @@ class Agent:
         graph.set_entry_point("llm")
         runnable = graph.compile(checkpointer=self.checkpointer)
         return runnable
+
+    def call_llm(self, state: AgentState):
+        messages = state['messages']
+        response = self.model.invoke(messages)
+        return {"messages": [response]}
+
+    def after_llm(self, state: AgentState):
+        return END
+
 
