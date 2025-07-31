@@ -12,6 +12,9 @@ class AgentState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add]
 
 
+SYSTEM_MESSAGE = "You are a helpful AI assistant. Answer the user's questions to the best of your ability."
+
+
 class Agent:
     def __init__(self, model, checkpointer):
         self.model = model
@@ -30,6 +33,8 @@ class Agent:
 
     def call_llm(self, state: AgentState):
         messages = state['messages']
+        if not messages or not isinstance(messages[0], SystemMessage):
+            messages = [SystemMessage(content=SYSTEM_MESSAGE)] + (messages or [])
         response = self.model.invoke(messages)
         return {"messages": [response]}
 
