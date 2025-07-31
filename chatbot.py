@@ -1,11 +1,14 @@
 import os
 import operator
+import uuid
 from typing import Annotated, TypedDict
 
+from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
-from langchain_core.messages import AnyMessage, SystemMessage, ToolMessage
+from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage
 from langgraph.graph import END, StateGraph
-
+from langgraph.checkpoint.sqlite import SqliteSaver
+load_dotenv()
 
 
 class AgentState(TypedDict):
@@ -40,5 +43,35 @@ class Agent:
 
     def after_llm(self, state: AgentState):
         return END
+
+if __name__ == "__main__":
+    model = ChatAnthropic(model="claude-3-haiku-20240307")
+    checkpointer = SqliteSaver.from_conn_string(":memory:")
+    agent = Agent(model, checkpointer)
+    runnable = agent.get_runnable()
+
+    while True:
+        user_input = input("User: ")
+        if user_input.lower() in ["quit", "exit", "q"]:
+            print("Goodbye!")
+            break
+
+        thread_id = str(uuid.uuid4())
+        config = {"configurable": {"thread_id": thread_id}}
+
+        try:
+            response = runnable.invoke(
+                {"messages": [HumanMessage(content=user_input)]},
+                config=config,
+            )
+            if response and response['messages']:
+                assistant_message = response['messages'][-1]
+                if hasattr(assistant_message, 'content'):
+                    print(f"Assistant: {assistant_message.content}")
+                else:
+                    print(f"Assistant: {assistant_message}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
 
 
