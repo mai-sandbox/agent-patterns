@@ -71,3 +71,4 @@ def main() -> None:
             logger.error(f"Error during chat: {e}")
             print("An error occurred. Please try again.")
 
+
