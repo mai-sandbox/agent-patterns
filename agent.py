@@ -36,18 +36,17 @@ class State(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
 
 
-def create_agent() -> StateGraph:
+def create_agent():
     """
     Create and configure the LangGraph agent with web search and webpage summarization capabilities.
     
     Returns:
-        StateGraph: Compiled graph ready for execution
+        Compiled graph ready for execution
     """
     # Initialize the language model (Anthropic Claude as preferred)
     llm = ChatAnthropic(
         model="claude-3-5-sonnet-20241022",
-        temperature=0.1,
-        max_tokens=4000
+        temperature=0.1
     )
     
     # Bind tools to the LLM so it knows what tools are available
@@ -150,3 +149,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
