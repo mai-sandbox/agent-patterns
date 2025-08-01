@@ -6,8 +6,6 @@ This module provides two main tools:
 2. Firecrawl webpage summarization tool for extracting and summarizing webpage content
 """
 
-import json
-from typing import Dict, Any, Optional
 
 from langchain_core.tools import tool
 from langchain_tavily import TavilySearch
@@ -111,7 +109,7 @@ def summarize_webpage(url: str) -> str:
         
         # Format the response with metadata and content
         result_parts = []
-        result_parts.append(f"**Webpage Content Summary**")
+        result_parts.append("**Webpage Content Summary**")
         result_parts.append(f"**URL:** {url}")
         result_parts.append(f"**Title:** {title}")
         result_parts.append(f"**Description:** {description}")

@@ -10,7 +10,6 @@ The agent uses a StateGraph architecture with conditional routing to determine
 when to use tools versus providing direct responses.
 """
 
-import os
 from typing import Annotated
 from typing_extensions import TypedDict
 
