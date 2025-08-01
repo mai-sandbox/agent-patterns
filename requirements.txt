@@ -1,0 +1,21 @@
+# Core LangGraph and LangChain dependencies
+langgraph>=0.2.0
+langchain>=0.2.0
+
+# LLM provider - using Anthropic as preferred
+langchain-anthropic>=0.1.0
+
+# Tool integrations
+langchain-tavily>=0.1.0
+firecrawl-py>=0.0.20
+langchain-community>=0.2.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Development and code quality tools
+ruff>=0.1.0
+mypy>=1.7.0
+
+# Additional dependencies for type hints and utilities
+typing-extensions>=4.5.0
