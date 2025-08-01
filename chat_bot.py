@@ -70,5 +70,8 @@ def main() -> None:
         except Exception as e:
             logger.error(f"Error during chat: {e}")
             print("An error occurred. Please try again.")
+if __name__ == "__main__":
+    main()
+
 
 
