@@ -131,7 +131,7 @@ Your decision:"""
         review_response = llm.invoke(review_messages)
         
         # Parse the review decision
-        review_content = review_response.content.strip()
+        review_content = str(review_response.content).strip() if review_response.content else ""
         if review_content.startswith("APPROVE"):
             decision = "approve"
         else:
@@ -296,6 +296,7 @@ def run_example():
 
 if __name__ == "__main__":
     run_example()
+
 
 
 
