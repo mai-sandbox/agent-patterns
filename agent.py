@@ -102,7 +102,7 @@ def fill_current_section(state: FormState) -> Dict[str, Any]:
     # 2. Get LLM response for form filling
     # 3. Parse the LLM response to extract field values
     # For demonstration, we'll simulate filling some fields
-    filled_data = {}
+    filled_data: Dict[str, Any] = {}
     for field in section_info["fields"]:
         if field in ["name", "email"]:
             filled_data[field] = f"sample_{field}"  # Placeholder values
@@ -308,6 +308,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
