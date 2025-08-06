@@ -277,7 +277,7 @@ def should_continue(state: FormState) -> str:
 
 
 # Build the StateGraph
-def create_form_agent() -> StateGraph:
+def create_form_agent() -> CompiledStateGraph:
     """Create and return the compiled form filling agent graph."""
     
     # Initialize the StateGraph with our custom state
@@ -362,6 +362,7 @@ if __name__ == "__main__":
     # Example usage
     print("Form Filling Agent initialized successfully!")
     print("The compiled graph is available as 'app' for deployment.")
+
 
 
 
