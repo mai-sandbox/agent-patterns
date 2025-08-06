@@ -32,7 +32,7 @@ class ReviewState(TypedDict):
     review_criteria: str
 
 
-def create_react_agent_node(llm: BaseChatModel, tools: Optional[List[BaseTool]] = None) -> callable:
+def create_react_agent_node(llm: BaseChatModel, tools: Optional[List[BaseTool]] = None) -> Callable[[ReviewState], Dict[str, Any]]:
     """
     Creates a generic ReAct agent node that can work with any LLM and tools.
     
@@ -296,5 +296,6 @@ def run_example():
 
 if __name__ == "__main__":
     run_example()
+
 
 
