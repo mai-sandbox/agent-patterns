@@ -80,7 +80,7 @@ def start_form_node(state: FormState) -> Dict[str, Union[str, List[str], Dict[st
     
     return {
         "messages": [system_message],
-        "current_section": "personal_info",
+        "current_section": "personal_info", 
         "available_sections": sections,
         "completed_sections": [],
         "form_data": {},
@@ -363,6 +363,7 @@ if __name__ == "__main__":
     # Example usage
     print("Form Filling Agent initialized successfully!")
     print("The compiled graph is available as 'app' for deployment.")
+
 
 
 
