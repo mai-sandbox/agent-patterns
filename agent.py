@@ -9,7 +9,7 @@ This module implements a generic two-stage review system where:
 The implementation is designed to be generic and accept arbitrary ReAct agent configurations.
 """
 
-from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional
 from typing_extensions import TypedDict
 
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
@@ -296,3 +296,4 @@ def run_example():
 
 if __name__ == "__main__":
     run_example()
+
