@@ -209,8 +209,13 @@ def move_to_next_section(state: FormState) -> Dict[str, Any]:
     Returns:
         Updated state with next section set as current
     """
-    all_sections = list(state["form_structure"].keys())
-    completed_sections = state["sections_completed"]
+    form_structure = state.get("form_structure", {})
+    completed_sections = state.get("sections_completed", [])
+    
+    if not form_structure:
+        return {"is_complete": True}
+    
+    all_sections = list(form_structure.keys())
     
     # Find next uncompleted section
     next_section: str | None = None
@@ -225,7 +230,11 @@ def move_to_next_section(state: FormState) -> Dict[str, Any]:
             "validation_errors": []  # Clear previous validation errors
         }
     else:
-        return {"is_complete": True}
+        # All sections completed
+        return {
+            "is_complete": True,
+            "current_section": ""
+        }
 
 def complete_form(state: FormState) -> Dict[str, Any]:
     """
@@ -327,6 +336,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
