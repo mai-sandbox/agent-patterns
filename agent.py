@@ -337,9 +337,9 @@ app = create_form_agent()
 
 
 # Optional: Function to run the agent (for testing)
-def run_form_agent(user_input: str = "") -> None:
+def run_form_agent(user_input: str = "") -> Dict[str, Union[str, List[str], Dict[str, str], List[BaseMessage]]]:
     """Run the form filling agent with optional user input."""
-    initial_state = {
+    initial_state: FormState = {
         "messages": [],
         "current_section": "",
         "form_data": {},
@@ -363,6 +363,7 @@ if __name__ == "__main__":
     # Example usage
     print("Form Filling Agent initialized successfully!")
     print("The compiled graph is available as 'app' for deployment.")
+
 
 
 
