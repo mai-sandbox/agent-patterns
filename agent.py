@@ -29,8 +29,7 @@ class FormState(TypedDict):
 
 # Initialize the LLM
 model = ChatAnthropic(
-    model="claude-3-5-sonnet-20241022",
-    api_key=os.getenv("ANTHROPIC_API_KEY")
+    model_name="claude-3-5-sonnet-20241022"
 )
 
 def analyze_form_structure(state: FormState) -> Dict[str, Any]:
@@ -309,6 +308,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
