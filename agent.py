@@ -82,7 +82,7 @@ Be thorough in your reasoning and provide clear, helpful responses."""
     return react_agent_node
 
 
-def create_review_agent_node(llm: BaseChatModel) -> Callable[[ReviewState], Dict[str, Any]]:
+def create_review_agent_node(llm: BaseChatModel) -> Any:
     """
     Creates a review agent node that evaluates the quality of responses.
     
@@ -296,6 +296,7 @@ def run_example():
 
 if __name__ == "__main__":
     run_example()
+
 
 
 
