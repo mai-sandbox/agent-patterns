@@ -1,0 +1,40 @@
+# Core LangGraph and LangChain dependencies
+langgraph>=0.2.0
+langchain>=0.2.0
+langchain-core>=0.2.0
+
+# LLM Provider integrations
+langchain-anthropic>=0.1.0
+langchain-openai>=0.1.0
+langchain-google-genai>=0.1.0
+
+# Environment and configuration management
+python-dotenv>=1.0.0
+
+# Type system support
+typing-extensions>=4.0.0
+
+# Development and code quality tools
+ruff>=0.1.0
+mypy>=1.7.0
+
+# Optional: Additional LLM providers
+# Uncomment as needed for your specific use case
+# langchain-aws>=0.1.0          # For AWS Bedrock
+# langchain-azure-openai>=0.1.0 # For Azure OpenAI
+# langchain-cohere>=0.1.0       # For Cohere
+# langchain-huggingface>=0.1.0  # For Hugging Face models
+
+# Optional: Tool integrations
+# Uncomment if you plan to add tools to your ReAct agent
+# langchain-community>=0.2.0    # Community tools and utilities
+# requests>=2.31.0              # For HTTP-based tools
+# beautifulsoup4>=4.12.0        # For web scraping tools
+# wikipedia>=1.4.0              # For Wikipedia search tool
+
+# Optional: Observability and monitoring
+# langsmith>=0.1.0              # For LangSmith tracing (recommended)
+
+# Optional: Additional utilities
+# pydantic>=2.0.0               # For data validation (usually included with langchain)
+# tiktoken>=0.5.0               # For token counting with OpenAI models

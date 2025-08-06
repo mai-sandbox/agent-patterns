@@ -1,0 +1,22 @@
+{
+    "dependencies": [
+        ".",
+        "langgraph>=0.2.0",
+        "langchain>=0.2.0",
+        "langchain-core>=0.2.0",
+        "langchain-anthropic>=0.1.0",
+        "langchain-openai>=0.1.0",
+        "langchain-google-genai>=0.1.0",
+        "python-dotenv>=1.0.0",
+        "typing-extensions>=4.0.0"
+    ],
+    "graphs": {
+        "two_stage_review_agent": "./agent.py:app"
+    },
+    "env": ".env",
+    "dockerfile_lines": [
+        "# Install any additional system dependencies if needed",
+        "# RUN apt-get update && apt-get install -y <package-name>",
+        "# Example: RUN apt-get update && apt-get install -y curl wget"
+    ]
+}
