@@ -305,11 +305,12 @@ if __name__ == "__main__":
     }
     
     try:
-        result = app.invoke(sample_input)
+        result = app.invoke(sample_input)  # type: ignore
         print("Form filling workflow completed successfully!")
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
