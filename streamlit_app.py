@@ -232,61 +232,156 @@ def main():
             with st.chat_message("user"):
                 st.write(user_input)
             
-            # Get agent response
+            # Get agent response with streaming
             with st.chat_message("assistant"):
                 response_placeholder = st.empty()
+                progress_placeholder = st.empty()
                 
                 try:
-                    # Use the invoke method for now (streaming will be added in next task)
-                    with st.spinner("Agent is thinking..."):
-                        response = st.session_state.langgraph_client.invoke_agent(
-                            user_input, 
-                            st.session_state.system_prompt
-                        )
+                    # Use streaming for real-time response display
+                    full_response = ""
+                    agent_thinking = True
                     
-                    if "error" in response:
-                        error_msg = f"❌ Error: {response['error']}"
-                        response_placeholder.error(error_msg)
-                        st.session_state.messages.append({
-                            "role": "assistant",
-                            "content": error_msg
-                        })
-                    else:
-                        # Extract the assistant's response
-                        if "output" in response and "messages" in response["output"]:
-                            messages = response["output"]["messages"]
-                            assistant_message = ""
-                            
-                            # Find the last assistant message
-                            for msg in reversed(messages):
-                                if msg.get("type") == "ai" or msg.get("role") == "assistant":
-                                    assistant_message = msg.get("content", "")
-                                    break
-                            
-                            if assistant_message:
-                                response_placeholder.write(assistant_message)
-                                st.session_state.messages.append({
-                                    "role": "assistant",
-                                    "content": assistant_message
-                                })
-                                st.session_state.agent_response = assistant_message
-                                st.session_state.show_feedback = True
-                            else:
-                                error_msg = "❌ No response received from agent"
-                                response_placeholder.error(error_msg)
-                                st.session_state.messages.append({
-                                    "role": "assistant",
-                                    "content": error_msg
-                                })
-                        else:
-                            error_msg = "❌ Unexpected response format from agent"
+                    # Show initial thinking indicator
+                    progress_placeholder.info("🤔 Agent is thinking...")
+                    
+                    # Stream the response
+                    for chunk in st.session_state.langgraph_client.stream_agent(
+                        user_input, 
+                        st.session_state.system_prompt
+                    ):
+                        if "error" in chunk:
+                            error_msg = f"❌ Error: {chunk['error']}"
+                            progress_placeholder.empty()
                             response_placeholder.error(error_msg)
                             st.session_state.messages.append({
                                 "role": "assistant",
                                 "content": error_msg
                             })
+                            break
+                        
+                        # Handle different streaming modes
+                        if "event" in chunk:
+                            event_type = chunk.get("event")
+                            
+                            # Handle agent progress updates
+                            if event_type == "on_chain_start":
+                                if agent_thinking:
+                                    progress_placeholder.info("🔧 Using tools...")
+                            elif event_type == "on_tool_start":
+                                tool_name = chunk.get("name", "unknown tool")
+                                progress_placeholder.info(f"🛠️ Using {tool_name}...")
+                            elif event_type == "on_tool_end":
+                                progress_placeholder.info("💭 Processing tool results...")
+                            elif event_type == "on_chat_model_start":
+                                progress_placeholder.info("🧠 Generating response...")
+                                agent_thinking = False
+                        
+                        # Handle LLM token streaming
+                        if "data" in chunk:
+                            data = chunk["data"]
+                            
+                            # Handle different data types
+                            if isinstance(data, dict):
+                                # Handle message chunks
+                                if "chunk" in data:
+                                    chunk_data = data["chunk"]
+                                    if isinstance(chunk_data, dict) and "content" in chunk_data:
+                                        token = chunk_data["content"]
+                                        if token:
+                                            full_response += token
+                                            # Update display with current response
+                                            response_placeholder.markdown(full_response + "▌")
+                                
+                                # Handle complete messages
+                                elif "messages" in data:
+                                    messages = data["messages"]
+                                    for msg in messages:
+                                        if msg.get("type") == "ai" or msg.get("role") == "assistant":
+                                            content = msg.get("content", "")
+                                            if content and content != full_response:
+                                                full_response = content
+                                                response_placeholder.markdown(full_response + "▌")
+                        
+                        # Handle custom updates
+                        if "output" in chunk:
+                            output = chunk["output"]
+                            if "messages" in output:
+                                messages = output["messages"]
+                                # Find the last assistant message
+                                for msg in reversed(messages):
+                                    if msg.get("type") == "ai" or msg.get("role") == "assistant":
+                                        content = msg.get("content", "")
+                                        if content:
+                                            full_response = content
+                                            break
+                    
+                    # Clear progress indicator and finalize response
+                    progress_placeholder.empty()
+                    
+                    if full_response:
+                        # Remove cursor and display final response
+                        response_placeholder.markdown(full_response)
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": full_response
+                        })
+                        st.session_state.agent_response = full_response
+                        st.session_state.show_feedback = True
+                    else:
+                        # Fallback to invoke method if streaming didn't work
+                        progress_placeholder.info("🔄 Falling back to standard mode...")
+                        response = st.session_state.langgraph_client.invoke_agent(
+                            user_input, 
+                            st.session_state.system_prompt
+                        )
+                        
+                        progress_placeholder.empty()
+                        
+                        if "error" in response:
+                            error_msg = f"❌ Error: {response['error']}"
+                            response_placeholder.error(error_msg)
+                            st.session_state.messages.append({
+                                "role": "assistant",
+                                "content": error_msg
+                            })
+                        else:
+                            # Extract the assistant's response
+                            if "output" in response and "messages" in response["output"]:
+                                messages = response["output"]["messages"]
+                                assistant_message = ""
+                                
+                                # Find the last assistant message
+                                for msg in reversed(messages):
+                                    if msg.get("type") == "ai" or msg.get("role") == "assistant":
+                                        assistant_message = msg.get("content", "")
+                                        break
+                                
+                                if assistant_message:
+                                    response_placeholder.write(assistant_message)
+                                    st.session_state.messages.append({
+                                        "role": "assistant",
+                                        "content": assistant_message
+                                    })
+                                    st.session_state.agent_response = assistant_message
+                                    st.session_state.show_feedback = True
+                                else:
+                                    error_msg = "❌ No response received from agent"
+                                    response_placeholder.error(error_msg)
+                                    st.session_state.messages.append({
+                                        "role": "assistant",
+                                        "content": error_msg
+                                    })
+                            else:
+                                error_msg = "❌ Unexpected response format from agent"
+                                response_placeholder.error(error_msg)
+                                st.session_state.messages.append({
+                                    "role": "assistant",
+                                    "content": error_msg
+                                })
                 
                 except Exception as e:
+                    progress_placeholder.empty()
                     error_msg = f"❌ Unexpected error: {str(e)}"
                     response_placeholder.error(error_msg)
                     st.session_state.messages.append({
@@ -317,3 +412,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
