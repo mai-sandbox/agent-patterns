@@ -114,11 +114,9 @@ def fill_current_section(state: FormState) -> Dict[str, Any]:
     Please respond with a JSON object containing the field values or indicate missing information.
     """
     
-    # Get LLM response
-    response = model.invoke([HumanMessage(content=prompt)])
-    
-    # For demonstration, we'll simulate filling some fields
+    # Get LLM response for form filling
     # In a real implementation, you'd parse the LLM response
+    # For demonstration, we'll simulate filling some fields
     filled_data = {}
     for field in section_info["fields"]:
         if field in ["name", "email"]:
@@ -325,4 +323,5 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
