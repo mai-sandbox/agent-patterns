@@ -66,7 +66,7 @@ def analyze_form_structure(state: FormState) -> Dict[str, Any]:
         form_structure = state["form_structure"]
     
     # Initialize form data structure
-    form_data = {}
+    form_data: Dict[str, Dict[str, Any]] = {}
     for section_name, section_info in form_structure.items():
         form_data[section_name] = {}
         for field in section_info["fields"]:
@@ -308,6 +308,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
