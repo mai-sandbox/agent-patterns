@@ -174,7 +174,7 @@ def create_two_stage_review_agent(
     tools: Optional[List[BaseTool]] = None,
     max_iterations: int = 3,
     review_criteria: str = ""
-) -> StateGraph:
+) -> Any:
     """
     Creates a two-stage review agent graph.
     
@@ -296,6 +296,7 @@ def run_example():
 
 if __name__ == "__main__":
     run_example()
+
 
 
 
