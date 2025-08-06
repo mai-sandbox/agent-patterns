@@ -182,6 +182,14 @@ def configuration_panel():
     st.sidebar.subheader("Connection")
     st.sidebar.info(f"Server: {LANGGRAPH_SERVER_URL}")
     
+    # Streaming configuration
+    st.sidebar.subheader("Streaming")
+    st.session_state.streaming_enabled = st.sidebar.checkbox(
+        "Enable streaming responses",
+        value=st.session_state.streaming_enabled,
+        help="Stream responses in real-time for better user experience"
+    )
+    
     # Test connection button
     if st.sidebar.button("Test Connection"):
         try:
@@ -415,5 +423,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
