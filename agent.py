@@ -276,22 +276,17 @@ workflow.add_node("validate_section", validate_section)
 workflow.add_node("move_to_next_section", move_to_next_section)
 workflow.add_node("complete_form", complete_form)
 
-# Add edges
+# Add edges - simplified linear flow with conditional routing
 workflow.add_edge(START, "analyze_form_structure")
 workflow.add_edge("analyze_form_structure", "fill_current_section")
 workflow.add_edge("fill_current_section", "validate_section")
 workflow.add_edge("move_to_next_section", "fill_current_section")
 workflow.add_edge("complete_form", END)
 
-# Add conditional edges
+# Add conditional edges from validate_section
 workflow.add_conditional_edges(
     "validate_section",
-    should_continue,
-    {
-        "fill_current_section": "fill_current_section",
-        "move_to_next_section": "move_to_next_section", 
-        "complete_form": "complete_form"
-    }
+    should_continue
 )
 
 # Compile the graph - REQUIRED: Export as 'app' for deployment
@@ -316,6 +311,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
