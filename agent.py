@@ -124,7 +124,9 @@ def process_section_node(state: FormState) -> Dict[str, Union[str, List[str], Di
     Respond helpfully and ask for any missing required information for this section.
     If the section appears complete, confirm the information and indicate readiness to move to the next section."""
     
-    messages = state["messages"] + [HumanMessage(content=user_input)] if user_input else state["messages"]
+    messages: List[BaseMessage] = list(state["messages"])
+    if user_input:
+        messages.append(HumanMessage(content=user_input))
     messages.append(SystemMessage(content=system_prompt))
     
     response = llm.invoke(messages)
@@ -362,6 +364,7 @@ if __name__ == "__main__":
     # Example usage
     print("Form Filling Agent initialized successfully!")
     print("The compiled graph is available as 'app' for deployment.")
+
 
 
 
