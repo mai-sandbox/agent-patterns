@@ -391,6 +391,59 @@ def main():
                                     "role": "assistant",
                                     "content": error_msg
                                 })
+                    
+                    else:
+                        # Non-streaming mode - use invoke method
+                        progress_placeholder.info("🤔 Agent is thinking...")
+                        
+                        response = st.session_state.langgraph_client.invoke_agent(
+                            user_input, 
+                            st.session_state.system_prompt
+                        )
+                        
+                        progress_placeholder.empty()
+                        
+                        if "error" in response:
+                            error_msg = f"❌ Error: {response['error']}"
+                            response_placeholder.error(error_msg)
+                            st.session_state.messages.append({
+                                "role": "assistant",
+                                "content": error_msg
+                            })
+                        else:
+                            # Extract the assistant's response
+                            if "output" in response and "messages" in response["output"]:
+                                messages = response["output"]["messages"]
+                                assistant_message = ""
+                                
+                                # Find the last assistant message
+                                for msg in reversed(messages):
+                                    if msg.get("type") == "ai" or msg.get("role") == "assistant":
+                                        assistant_message = msg.get("content", "")
+                                        break
+                                
+                                if assistant_message:
+                                    response_placeholder.write(assistant_message)
+                                    st.session_state.messages.append({
+                                        "role": "assistant",
+                                        "content": assistant_message
+                                    })
+                                    st.session_state.agent_response = assistant_message
+                                    st.session_state.show_feedback = True
+                                else:
+                                    error_msg = "❌ No response received from agent"
+                                    response_placeholder.error(error_msg)
+                                    st.session_state.messages.append({
+                                        "role": "assistant",
+                                        "content": error_msg
+                                    })
+                            else:
+                                error_msg = "❌ Unexpected response format from agent"
+                                response_placeholder.error(error_msg)
+                                st.session_state.messages.append({
+                                    "role": "assistant",
+                                    "content": error_msg
+                                })
                 
                 except Exception as e:
                     progress_placeholder.empty()
@@ -424,6 +477,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
