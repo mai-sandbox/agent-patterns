@@ -51,10 +51,7 @@ def get_llm() -> ChatAnthropic:
     # Set the API key as environment variable for ChatAnthropic
     os.environ["ANTHROPIC_API_KEY"] = api_key
     
-    return ChatAnthropic(
-        model_name="claude-3-5-sonnet-20241022",
-        temperature=0.1
-    )
+    return ChatAnthropic()
 
 
 # Node functions for form processing
@@ -366,6 +363,7 @@ if __name__ == "__main__":
     # Example usage
     print("Form Filling Agent initialized successfully!")
     print("The compiled graph is available as 'app' for deployment.")
+
 
 
 
