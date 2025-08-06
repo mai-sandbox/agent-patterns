@@ -1,0 +1,17 @@
+# LangGraph Form Filling Agent Dependencies
+# Core LangGraph and LangChain packages
+langgraph>=0.2.0
+langchain>=0.2.0
+
+# LLM Provider - Anthropic Claude
+langchain-anthropic>=0.1.0
+
+# Environment and Configuration Management
+python-dotenv>=1.0.0
+
+# Type Hinting Support
+typing-extensions>=4.0.0
+
+# Additional dependencies for robust functionality
+# JSON handling and data validation (usually included in Python stdlib, but explicit for clarity)
+# These may be automatically resolved by the above packages, but listed for completeness
