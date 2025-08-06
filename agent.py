@@ -10,7 +10,6 @@ from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_anthropic import ChatAnthropic
-import os
 from dotenv import load_dotenv
 
 # Load environment variables
