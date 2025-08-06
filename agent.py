@@ -238,33 +238,33 @@ def should_continue(state: FormState) -> str:
     """
     # If form is complete, end workflow
     if state.get("is_complete", False):
-        return END
+        return "complete_form"
     
-    # If there are validation errors, retry filling current section
-    if state.get("validation_errors"):
-        return "fill_current_section"
-    
-    # Check if current section is completed
-    current_section = state.get("current_section")
+    # Get current state information
+    current_section = state.get("current_section", "")
     sections_completed = state.get("sections_completed", [])
     form_structure = state.get("form_structure", {})
+    validation_errors = state.get("validation_errors", [])
     
+    # If there are validation errors, retry filling current section
+    if validation_errors:
+        return "fill_current_section"
+    
+    # If current section is completed, move to next section or complete
     if current_section and current_section in sections_completed:
-        # Current section is completed, check if all sections are done
         all_sections = list(form_structure.keys())
-        
         if len(sections_completed) >= len(all_sections):
             return "complete_form"
         else:
             return "move_to_next_section"
     
-    # If no current section or current section not completed, continue processing
-    if not current_section or not form_structure:
-        # This shouldn't happen after analyze_form_structure, but handle gracefully
-        return END
+    # If we have a current section but it's not completed, move to next section
+    # This handles the case where validation passed but section isn't marked complete
+    if current_section and form_structure:
+        return "move_to_next_section"
     
-    # Current section exists but not completed, continue with validation
-    return "move_to_next_section"
+    # Fallback - complete the form
+    return "complete_form"
 
 # Create the StateGraph
 workflow = StateGraph(FormState)
@@ -316,6 +316,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
