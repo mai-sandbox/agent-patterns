@@ -292,7 +292,7 @@ app = workflow.compile()
 # Optional: Add debugging/visualization support
 if __name__ == "__main__":
     # Test the graph with sample input
-    sample_input = {
+    sample_input: FormState = {
         "messages": [HumanMessage(content="I need to fill out a form with my information.")],
         "current_section": "",
         "form_data": {},
@@ -308,6 +308,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
