@@ -148,6 +148,9 @@ def initialize_session_state():
     
     if "show_feedback" not in st.session_state:
         st.session_state.show_feedback = False
+    
+    if "streaming_enabled" not in st.session_state:
+        st.session_state.streaming_enabled = True
 
 
 def display_chat_messages():
@@ -412,4 +415,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
