@@ -98,24 +98,10 @@ def fill_current_section(state: FormState) -> Dict[str, Any]:
     current_section = state["current_section"]
     section_info = state["form_structure"][current_section]
     
-    # Create prompt for filling the current section
-    prompt = f"""
-    You are helping to fill out a form section: {current_section}
-    
-    Section description: {section_info['description']}
-    Required fields: {section_info['required']}
-    All fields: {section_info['fields']}
-    
-    Based on the conversation context, please provide appropriate values for this section.
-    If you don't have enough information, indicate which fields need user input.
-    
-    Current conversation: {state.get('messages', [])}
-    
-    Please respond with a JSON object containing the field values or indicate missing information.
-    """
-    
-    # Get LLM response for form filling
-    # In a real implementation, you'd parse the LLM response
+    # In a real implementation, you would:
+    # 1. Create a prompt for the LLM based on section info and conversation context
+    # 2. Get LLM response for form filling
+    # 3. Parse the LLM response to extract field values
     # For demonstration, we'll simulate filling some fields
     filled_data = {}
     for field in section_info["fields"]:
@@ -323,5 +309,6 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
