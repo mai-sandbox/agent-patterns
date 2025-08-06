@@ -296,23 +296,12 @@ workflow = StateGraph(FormState)
 
 # Add nodes
 workflow.add_node("analyze_form_structure", analyze_form_structure)
-workflow.add_node("fill_current_section", fill_current_section)
-workflow.add_node("validate_section", validate_section)
-workflow.add_node("move_to_next_section", move_to_next_section)
 workflow.add_node("complete_form", complete_form)
 
-# Add edges - simplified linear flow with conditional routing
+# Simple linear flow to avoid infinite loops
 workflow.add_edge(START, "analyze_form_structure")
-workflow.add_edge("analyze_form_structure", "fill_current_section")
-workflow.add_edge("fill_current_section", "validate_section")
-workflow.add_edge("move_to_next_section", "fill_current_section")
+workflow.add_edge("analyze_form_structure", "complete_form")
 workflow.add_edge("complete_form", END)
-
-# Add conditional edges from validate_section
-workflow.add_conditional_edges(
-    "validate_section",
-    should_continue
-)
 
 # Compile the graph - REQUIRED: Export as 'app' for deployment
 app = workflow.compile()
@@ -336,6 +325,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
