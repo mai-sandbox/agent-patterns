@@ -1,0 +1,19 @@
+# Core LangGraph dependencies
+langgraph>=0.3.27
+langchain-core>=0.2.38
+
+# LLM Provider (Anthropic preferred)
+langchain-anthropic>=0.1.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Additional tools for form processing
+langchain-community>=0.2.0
+
+# Development and code quality tools
+ruff>=0.1.0
+mypy>=1.7.0
+
+# Type hints support
+typing-extensions>=4.8.0
