@@ -1,0 +1,13 @@
+{
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "agent": {
+      "path": "agent.py:app",
+      "description": "Simple chat agent with tool calling capabilities"
+    }
+  },
+  "env": ".env",
+  "python_version": "3.11"
+}
