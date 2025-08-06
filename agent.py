@@ -246,18 +246,25 @@ def should_continue(state: FormState) -> str:
     
     # Check if current section is completed
     current_section = state.get("current_section")
-    if current_section and current_section in state.get("sections_completed", []):
-        # Move to next section or complete
-        all_sections = list(state["form_structure"].keys())
-        completed_sections = state["sections_completed"]
+    sections_completed = state.get("sections_completed", [])
+    form_structure = state.get("form_structure", {})
+    
+    if current_section and current_section in sections_completed:
+        # Current section is completed, check if all sections are done
+        all_sections = list(form_structure.keys())
         
-        if len(completed_sections) >= len(all_sections):
+        if len(sections_completed) >= len(all_sections):
             return "complete_form"
         else:
             return "move_to_next_section"
     
-    # Continue with current section
-    return "validate_section"
+    # If no current section or current section not completed, continue processing
+    if not current_section or not form_structure:
+        # This shouldn't happen after analyze_form_structure, but handle gracefully
+        return END
+    
+    # Current section exists but not completed, continue with validation
+    return "move_to_next_section"
 
 # Create the StateGraph
 workflow = StateGraph(FormState)
@@ -310,6 +317,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
