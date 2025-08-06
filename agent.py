@@ -137,9 +137,9 @@ def process_section_node(state: FormState) -> Dict[str, Union[str, List[str], Di
 def validate_section_node(state: FormState) -> Dict[str, Union[str, List[str], Dict[str, str]]]:
     """Validate the current section data."""
     current_section = state["current_section"]
-    user_input = state.get("user_input", "")
+    user_input = state.get("user_input") or ""
     form_data = state["form_data"].copy()
-    validation_errors = []
+    validation_errors: List[str] = []
     
     # Simple validation logic for each section
     if current_section == "personal_info":
@@ -362,6 +362,7 @@ if __name__ == "__main__":
     # Example usage
     print("Form Filling Agent initialized successfully!")
     print("The compiled graph is available as 'app' for deployment.")
+
 
 
 
