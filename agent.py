@@ -10,9 +10,10 @@ from typing import Annotated, Dict, List, Literal, Optional, Union
 from typing_extensions import TypedDict
 
 from langchain_anthropic import ChatAnthropic
-from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage, BaseMessage
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
+from langgraph.graph.state import CompiledStateGraph
 
 
 # Custom State class using TypedDict to track form progress
@@ -361,4 +362,5 @@ if __name__ == "__main__":
     # Example usage
     print("Form Filling Agent initialized successfully!")
     print("The compiled graph is available as 'app' for deployment.")
+
 
