@@ -1,0 +1,319 @@
+"""
+Streamlit application for LangGraph agent interaction and feedback.
+Connects to a LangGraph agent deployed using 'langgraph dev'.
+"""
+
+import asyncio
+import json
+import os
+from typing import Dict, List, Any, Optional
+import streamlit as st
+import httpx
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Configuration
+LANGGRAPH_SERVER_URL = os.getenv("LANGGRAPH_SERVER_URL", "http://localhost:8123")
+DEFAULT_SYSTEM_PROMPT = "You are a helpful AI assistant with access to tools."
+
+# Page configuration
+st.set_page_config(
+    page_title="LangGraph Agent Chat",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+class LangGraphClient:
+    """Client for interacting with LangGraph deployed agent."""
+    
+    def __init__(self, server_url: str):
+        self.server_url = server_url.rstrip('/')
+        self.client = httpx.Client(timeout=30.0)
+    
+    def invoke_agent(self, message: str, system_prompt: str) -> Dict[str, Any]:
+        """
+        Invoke the agent with a message and system prompt.
+        
+        Args:
+            message: User message to send to the agent
+            system_prompt: System prompt configuration
+            
+        Returns:
+            Response from the agent
+        """
+        try:
+            # Prepare the request payload
+            payload = {
+                "input": {
+                    "messages": [{"type": "human", "content": message}],
+                    "system_prompt": system_prompt
+                },
+                "config": {
+                    "configurable": {
+                        "system_prompt": system_prompt
+                    }
+                }
+            }
+            
+            # Make request to LangGraph server
+            response = self.client.post(
+                f"{self.server_url}/agent/invoke",
+                json=payload,
+                headers={"Content-Type": "application/json"}
+            )
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                return {
+                    "error": f"Server returned status {response.status_code}: {response.text}"
+                }
+                
+        except Exception as e:
+            return {"error": f"Connection error: {str(e)}"}
+    
+    def stream_agent(self, message: str, system_prompt: str):
+        """
+        Stream responses from the agent.
+        
+        Args:
+            message: User message to send to the agent
+            system_prompt: System prompt configuration
+            
+        Yields:
+            Streaming responses from the agent
+        """
+        try:
+            # Prepare the request payload
+            payload = {
+                "input": {
+                    "messages": [{"type": "human", "content": message}],
+                    "system_prompt": system_prompt
+                },
+                "config": {
+                    "configurable": {
+                        "system_prompt": system_prompt
+                    }
+                }
+            }
+            
+            # Make streaming request to LangGraph server
+            with self.client.stream(
+                "POST",
+                f"{self.server_url}/agent/stream",
+                json=payload,
+                headers={"Content-Type": "application/json"}
+            ) as response:
+                
+                if response.status_code != 200:
+                    yield {"error": f"Server returned status {response.status_code}: {response.text}"}
+                    return
+                
+                for line in response.iter_lines():
+                    if line:
+                        try:
+                            # Parse streaming response
+                            data = json.loads(line)
+                            yield data
+                        except json.JSONDecodeError:
+                            continue
+                            
+        except Exception as e:
+            yield {"error": f"Connection error: {str(e)}"}
+    
+    def close(self):
+        """Close the HTTP client."""
+        self.client.close()
+
+
+def initialize_session_state():
+    """Initialize Streamlit session state variables."""
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    
+    if "system_prompt" not in st.session_state:
+        st.session_state.system_prompt = DEFAULT_SYSTEM_PROMPT
+    
+    if "langgraph_client" not in st.session_state:
+        st.session_state.langgraph_client = LangGraphClient(LANGGRAPH_SERVER_URL)
+    
+    if "last_user_input" not in st.session_state:
+        st.session_state.last_user_input = ""
+    
+    if "agent_response" not in st.session_state:
+        st.session_state.agent_response = ""
+    
+    if "show_feedback" not in st.session_state:
+        st.session_state.show_feedback = False
+
+
+def display_chat_messages():
+    """Display chat messages in the main area."""
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
+
+
+def configuration_panel():
+    """Display the configuration panel in the sidebar."""
+    st.sidebar.header("🔧 Configuration")
+    
+    # System prompt configuration
+    st.sidebar.subheader("System Prompt")
+    new_system_prompt = st.sidebar.text_area(
+        "Edit the system prompt:",
+        value=st.session_state.system_prompt,
+        height=150,
+        help="This defines how the agent behaves and responds to users."
+    )
+    
+    # Update system prompt if changed
+    if new_system_prompt != st.session_state.system_prompt:
+        st.session_state.system_prompt = new_system_prompt
+        st.sidebar.success("System prompt updated!")
+    
+    # Connection status
+    st.sidebar.subheader("Connection")
+    st.sidebar.info(f"Server: {LANGGRAPH_SERVER_URL}")
+    
+    # Test connection button
+    if st.sidebar.button("Test Connection"):
+        try:
+            response = httpx.get(f"{LANGGRAPH_SERVER_URL}/health", timeout=5.0)
+            if response.status_code == 200:
+                st.sidebar.success("✅ Connected to LangGraph server")
+            else:
+                st.sidebar.error(f"❌ Server responded with status {response.status_code}")
+        except Exception as e:
+            st.sidebar.error(f"❌ Connection failed: {str(e)}")
+
+
+def main():
+    """Main Streamlit application."""
+    # Initialize session state
+    initialize_session_state()
+    
+    # App header
+    st.title("🤖 LangGraph Agent Chat")
+    st.markdown("Chat with a LangGraph agent that has tool calling capabilities!")
+    
+    # Configuration panel
+    configuration_panel()
+    
+    # Main chat interface
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        st.subheader("💬 Conversation")
+        
+        # Chat messages container
+        chat_container = st.container()
+        
+        with chat_container:
+            display_chat_messages()
+        
+        # User input
+        user_input = st.chat_input("Type your message here...")
+        
+        if user_input:
+            # Store the user input
+            st.session_state.last_user_input = user_input
+            
+            # Add user message to chat
+            st.session_state.messages.append({
+                "role": "user", 
+                "content": user_input
+            })
+            
+            # Display user message
+            with st.chat_message("user"):
+                st.write(user_input)
+            
+            # Get agent response
+            with st.chat_message("assistant"):
+                response_placeholder = st.empty()
+                
+                try:
+                    # Use the invoke method for now (streaming will be added in next task)
+                    with st.spinner("Agent is thinking..."):
+                        response = st.session_state.langgraph_client.invoke_agent(
+                            user_input, 
+                            st.session_state.system_prompt
+                        )
+                    
+                    if "error" in response:
+                        error_msg = f"❌ Error: {response['error']}"
+                        response_placeholder.error(error_msg)
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": error_msg
+                        })
+                    else:
+                        # Extract the assistant's response
+                        if "output" in response and "messages" in response["output"]:
+                            messages = response["output"]["messages"]
+                            assistant_message = ""
+                            
+                            # Find the last assistant message
+                            for msg in reversed(messages):
+                                if msg.get("type") == "ai" or msg.get("role") == "assistant":
+                                    assistant_message = msg.get("content", "")
+                                    break
+                            
+                            if assistant_message:
+                                response_placeholder.write(assistant_message)
+                                st.session_state.messages.append({
+                                    "role": "assistant",
+                                    "content": assistant_message
+                                })
+                                st.session_state.agent_response = assistant_message
+                                st.session_state.show_feedback = True
+                            else:
+                                error_msg = "❌ No response received from agent"
+                                response_placeholder.error(error_msg)
+                                st.session_state.messages.append({
+                                    "role": "assistant",
+                                    "content": error_msg
+                                })
+                        else:
+                            error_msg = "❌ Unexpected response format from agent"
+                            response_placeholder.error(error_msg)
+                            st.session_state.messages.append({
+                                "role": "assistant",
+                                "content": error_msg
+                            })
+                
+                except Exception as e:
+                    error_msg = f"❌ Unexpected error: {str(e)}"
+                    response_placeholder.error(error_msg)
+                    st.session_state.messages.append({
+                        "role": "assistant",
+                        "content": error_msg
+                    })
+    
+    with col2:
+        st.subheader("📊 Session Info")
+        
+        # Display session statistics
+        st.metric("Messages", len(st.session_state.messages))
+        st.metric("System Prompt Length", len(st.session_state.system_prompt))
+        
+        # Clear conversation button
+        if st.button("🗑️ Clear Conversation", type="secondary"):
+            st.session_state.messages = []
+            st.session_state.show_feedback = False
+            st.rerun()
+        
+        # Display current system prompt (truncated)
+        st.subheader("🎯 Current System Prompt")
+        prompt_preview = st.session_state.system_prompt[:100]
+        if len(st.session_state.system_prompt) > 100:
+            prompt_preview += "..."
+        st.text_area("", value=prompt_preview, height=100, disabled=True)
+
+
+if __name__ == "__main__":
+    main()
