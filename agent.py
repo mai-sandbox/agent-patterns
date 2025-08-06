@@ -289,9 +289,8 @@ workflow.add_conditional_edges(
     should_continue,
     {
         "fill_current_section": "fill_current_section",
-        "move_to_next_section": "move_to_next_section",
-        "complete_form": "complete_form",
-        END: END
+        "move_to_next_section": "move_to_next_section", 
+        "complete_form": "complete_form"
     }
 )
 
@@ -317,6 +316,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
