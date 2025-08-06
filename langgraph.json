@@ -1,0 +1,10 @@
+{
+    "dependencies": [
+        "./agent",
+        "langchain_anthropic"
+    ],
+    "graphs": {
+        "form_agent": "./agent.py:app"
+    },
+    "env": "./.env"
+}
