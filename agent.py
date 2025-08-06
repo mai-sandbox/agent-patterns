@@ -247,7 +247,7 @@ def route_after_validation(state: FormState) -> Literal["process_section", "comp
         return "complete_section"
 
 
-def route_after_completion(state: FormState) -> Literal["process_section", "finalize_form", END]:
+def route_after_completion(state: FormState) -> str:
     """Route to next section or finalize form."""
     current_section = state["current_section"]
     available_sections = state["available_sections"]
@@ -264,7 +264,7 @@ def route_after_completion(state: FormState) -> Literal["process_section", "fina
     return "finalize_form"
 
 
-def should_continue(state: FormState) -> Literal["process_section", END]:
+def should_continue(state: FormState) -> str:
     """Determine if we should continue processing or end."""
     completed_sections = state["completed_sections"]
     available_sections = state["available_sections"]
@@ -362,6 +362,7 @@ if __name__ == "__main__":
     # Example usage
     print("Form Filling Agent initialized successfully!")
     print("The compiled graph is available as 'app' for deployment.")
+
 
 
 
