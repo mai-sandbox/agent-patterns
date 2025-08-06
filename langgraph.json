@@ -1,0 +1,14 @@
+{
+    "dependencies": [
+        "langgraph",
+        "langchain",
+        "langchain-anthropic",
+        "python-dotenv",
+        "typing-extensions",
+        "./"
+    ],
+    "graphs": {
+        "form_agent": "./agent.py:app"
+    },
+    "env": "./.env"
+}
