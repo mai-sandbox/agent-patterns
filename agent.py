@@ -195,7 +195,7 @@ def move_to_next_section(state: FormState) -> Dict[str, Any]:
     completed_sections = state["sections_completed"]
     
     # Find next uncompleted section
-    next_section = None
+    next_section: str | None = None
     for section in all_sections:
         if section not in completed_sections:
             next_section = section
@@ -308,6 +308,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
