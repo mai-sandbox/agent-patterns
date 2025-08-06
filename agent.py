@@ -29,7 +29,7 @@ class FormState(TypedDict):
 
 # Initialize the LLM
 try:
-    model = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+    model = ChatAnthropic(model_name="claude-3-5-sonnet-20241022")  # type: ignore
 except Exception:
     # Fallback initialization if API key is not available
     model = None  # type: ignore
@@ -310,6 +310,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
