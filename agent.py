@@ -202,7 +202,7 @@ def complete_section_node(state: FormState) -> Dict[str, Union[str, List[str]]]:
     }
 
 
-def finalize_form_node(state: FormState) -> Dict[str, List[AnyMessage]]:
+def finalize_form_node(state: FormState) -> Dict[str, List[BaseMessage]]:
     """Finalize the form and provide summary."""
     llm = get_llm()
     
@@ -364,6 +364,7 @@ if __name__ == "__main__":
     # Example usage
     print("Form Filling Agent initialized successfully!")
     print("The compiled graph is available as 'app' for deployment.")
+
 
 
 
