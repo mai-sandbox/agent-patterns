@@ -249,18 +249,19 @@ def main():
                 progress_placeholder = st.empty()
                 
                 try:
-                    # Use streaming for real-time response display
-                    full_response = ""
-                    agent_thinking = True
-                    
-                    # Show initial thinking indicator
-                    progress_placeholder.info("🤔 Agent is thinking...")
-                    
-                    # Stream the response
-                    for chunk in st.session_state.langgraph_client.stream_agent(
-                        user_input, 
-                        st.session_state.system_prompt
-                    ):
+                    if st.session_state.streaming_enabled:
+                        # Use streaming for real-time response display
+                        full_response = ""
+                        agent_thinking = True
+                        
+                        # Show initial thinking indicator
+                        progress_placeholder.info("🤔 Agent is thinking...")
+                        
+                        # Stream the response
+                        for chunk in st.session_state.langgraph_client.stream_agent(
+                            user_input, 
+                            st.session_state.system_prompt
+                        ):
                         if "error" in chunk:
                             error_msg = f"❌ Error: {chunk['error']}"
                             progress_placeholder.empty()
@@ -423,6 +424,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
