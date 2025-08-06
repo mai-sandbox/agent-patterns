@@ -131,13 +131,24 @@ def validate_section(state: FormState) -> Dict[str, Any]:
         Updated state with validation results
     """
     current_section = state["current_section"]
-    section_info = state["form_structure"][current_section]
-    section_data = state["form_data"][current_section]
+    form_structure = state.get("form_structure", {})
+    form_data = state.get("form_data", {})
+    
+    # Handle case where section doesn't exist
+    if not current_section or current_section not in form_structure:
+        return {
+            "validation_errors": [],
+            "sections_completed": state.get("sections_completed", []),
+            "is_complete": True  # Force completion if no valid section
+        }
+    
+    section_info = form_structure[current_section]
+    section_data = form_data.get(current_section, {})
     
     validation_errors = []
     
     # Check required fields
-    for required_field in section_info["required"]:
+    for required_field in section_info.get("required", []):
         if not section_data.get(required_field):
             validation_errors.append(f"Missing required field: {required_field} in {current_section}")
     
@@ -152,9 +163,14 @@ def validate_section(state: FormState) -> Dict[str, Any]:
     if not validation_errors and current_section not in sections_completed:
         sections_completed.append(current_section)
     
+    # Check if all sections are completed
+    all_sections = list(form_structure.keys())
+    is_complete = len(sections_completed) >= len(all_sections)
+    
     return {
         "validation_errors": validation_errors,
-        "sections_completed": sections_completed
+        "sections_completed": sections_completed,
+        "is_complete": is_complete
     }
 
 def determine_next_section(state: FormState) -> str:
@@ -311,6 +327,7 @@ if __name__ == "__main__":
         print(f"Final state: {result}")
     except Exception as e:
         print(f"Error running workflow: {e}")
+
 
 
 
