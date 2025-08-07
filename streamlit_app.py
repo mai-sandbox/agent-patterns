@@ -319,14 +319,14 @@ def main():
                             if "output" in chunk:
                                 output = chunk["output"]
                                 if "messages" in output:
-                                messages = output["messages"]
-                                # Find the last assistant message
-                                for msg in reversed(messages):
-                                    if msg.get("type") == "ai" or msg.get("role") == "assistant":
-                                        content = msg.get("content", "")
-                                        if content:
-                                            full_response = content
-                                            break
+                                    messages = output["messages"]
+                                    # Find the last assistant message
+                                    for msg in reversed(messages):
+                                        if msg.get("type") == "ai" or msg.get("role") == "assistant":
+                                            content = msg.get("content", "")
+                                            if content:
+                                                full_response = content
+                                                break
                     
                     # Clear progress indicator and finalize response
                     progress_placeholder.empty()
@@ -477,6 +477,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
