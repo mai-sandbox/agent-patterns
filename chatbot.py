@@ -100,7 +100,7 @@ class BasicChatbot:
             logger.error(f"Failed to initialize chatbot: {e}")
             raise ChatbotError(f"Initialization failed: {e}") from e
     
-    def _build_graph(self) -> StateGraph:
+    def _build_graph(self) -> CompiledStateGraph:
         """
         Build the LangGraph StateGraph for conversation flow.
         
@@ -374,5 +374,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
