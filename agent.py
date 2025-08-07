@@ -81,7 +81,7 @@ def get_time() -> str:
 tools = [get_weather, calculator, get_time]
 
 
-def create_agent(system_prompt: str = None) -> CompiledStateGraph:
+def create_agent_with_config(system_prompt: str = None) -> CompiledStateGraph:
     """Create a LangGraph chat agent with configurable system prompt.
     
     Args:
@@ -119,9 +119,41 @@ def create_agent(system_prompt: str = None) -> CompiledStateGraph:
     return agent
 
 
+# Create a configurable agent that can receive runtime configuration
+from langgraph.graph import StateGraph
+from langgraph.prebuilt.chat_agent_executor import AgentState
+from langgraph.runtime import Runtime
+from typing import Optional
+from langchain_core.runnables import RunnableConfig
+
+def create_configurable_agent():
+    """Create a configurable agent that can receive system prompt from runtime config."""
+    
+    def agent_with_config(state: AgentState, config: Optional[RunnableConfig] = None):
+        """Agent node that uses configurable system prompt."""
+        # Extract system prompt from config
+        system_prompt = None
+        if config and config.get("configurable"):
+            system_prompt = config["configurable"].get("system_prompt")
+        
+        # Create agent with the configured system prompt
+        agent = create_agent_with_config(system_prompt)
+        
+        # Invoke the agent with the current state
+        return agent.invoke(state, config)
+    
+    # Create a simple graph that uses the configurable agent
+    workflow = StateGraph(AgentState)
+    workflow.add_node("agent", agent_with_config)
+    workflow.set_entry_point("agent")
+    workflow.set_finish_point("agent")
+    
+    return workflow.compile()
+
+
 # Create the default agent instance for deployment
 # This is the main export that langgraph dev will use
-app = create_agent()
+app = create_configurable_agent()
 
 
 if __name__ == "__main__":
@@ -147,3 +179,4 @@ if __name__ == "__main__":
                 print(f"Assistant: {assistant_msg.content}")
         except Exception as e:
             print(f"Error: {e}")
+
