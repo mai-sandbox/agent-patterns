@@ -61,7 +61,7 @@ def web_search_simulator(query: str) -> str:
 tools = [calculator, web_search_simulator]
 
 
-def create_agent_with_config(system_prompt: str = "You are a helpful AI assistant with access to tools.") -> StateGraph:
+def create_agent_with_config(system_prompt: str = "You are a helpful AI assistant with access to tools."):
     """
     Create a LangGraph agent with the specified system prompt.
     
@@ -159,4 +159,5 @@ if __name__ == "__main__":
             print(f"System: {message.content}")
         else:
             print(f"Assistant: {message.content}")
+
 
