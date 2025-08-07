@@ -81,7 +81,7 @@ def get_time() -> str:
 tools = [get_weather, calculator, get_time]
 
 
-def create_agent_with_config(system_prompt: Optional[str] = None) -> CompiledStateGraph:
+def create_agent(system_prompt: Optional[str] = None) -> CompiledStateGraph:
     """Create a LangGraph chat agent with configurable system prompt.
     
     Args:
@@ -169,6 +169,7 @@ if __name__ == "__main__":
                 print(f"Assistant: {assistant_msg.content}")
         except Exception as e:
             print(f"Error: {e}")
+
 
 
 
