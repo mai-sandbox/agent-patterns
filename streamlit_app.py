@@ -262,7 +262,7 @@ def main():
                             user_input, 
                             st.session_state.system_prompt
                         ):
-                        if "error" in chunk:
+                            if "error" in chunk:
                             error_msg = f"❌ Error: {chunk['error']}"
                             progress_placeholder.empty()
                             response_placeholder.error(error_msg)
@@ -477,6 +477,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
