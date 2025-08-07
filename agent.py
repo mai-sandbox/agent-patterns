@@ -7,7 +7,7 @@ configurable system prompt parameter.
 """
 
 import os
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from langchain_core.tools import tool
 from langchain_core.messages import SystemMessage
 from langchain_anthropic import ChatAnthropic
@@ -169,6 +169,7 @@ if __name__ == "__main__":
                 print(f"Assistant: {assistant_msg.content}")
         except Exception as e:
             print(f"Error: {e}")
+
 
 
 
