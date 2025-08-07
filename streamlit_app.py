@@ -504,6 +504,11 @@ def main():
                         "role": "assistant",
                         "content": error_msg
                     })
+        
+        # Feedback collection system
+        if st.session_state.show_feedback and st.session_state.agent_response:
+            st.divider()
+            feedback_section()
     
     with col2:
         st.subheader("📊 Session Info")
@@ -528,6 +533,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
