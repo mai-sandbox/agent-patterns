@@ -263,11 +263,11 @@ def main():
                             st.session_state.system_prompt
                         ):
                             if "error" in chunk:
-                            error_msg = f"❌ Error: {chunk['error']}"
-                            progress_placeholder.empty()
-                            response_placeholder.error(error_msg)
-                            st.session_state.messages.append({
-                                "role": "assistant",
+                                error_msg = f"❌ Error: {chunk['error']}"
+                                progress_placeholder.empty()
+                                response_placeholder.error(error_msg)
+                                st.session_state.messages.append({
+                                    "role": "assistant",
                                 "content": error_msg
                             })
                                 break
@@ -477,6 +477,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
