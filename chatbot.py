@@ -81,11 +81,13 @@ class BasicChatbot:
             self.max_tokens = int(os.getenv("MAX_TOKENS", "1000"))
             self.temperature = float(os.getenv("TEMPERATURE", "0.7"))
             
+            # Set the API key as environment variable for ChatAnthropic
+            os.environ["ANTHROPIC_API_KEY"] = api_key
+            
             self.llm = ChatAnthropic(
-                model_name=self.model_name,
-                max_tokens_to_sample=self.max_tokens,
-                temperature=self.temperature,
-                anthropic_api_key=api_key
+                model=self.model_name,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature
             )
             
             # Build the conversation graph
@@ -386,6 +388,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
 
