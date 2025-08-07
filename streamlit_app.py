@@ -317,8 +317,8 @@ def main():
                             
                             # Handle custom updates
                             if "output" in chunk:
-                            output = chunk["output"]
-                            if "messages" in output:
+                                output = chunk["output"]
+                                if "messages" in output:
                                 messages = output["messages"]
                                 # Find the last assistant message
                                 for msg in reversed(messages):
@@ -477,6 +477,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
