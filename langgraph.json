@@ -1,0 +1,30 @@
+{
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "agent": {
+      "path": "agent.py:app",
+      "description": "A simple chat agent with tool calling capabilities including weather, calculator, and time tools"
+    }
+  },
+  "env": ".env",
+  "dockerfile_lines": [],
+  "assistants": {
+    "agent": {
+      "graph_id": "agent",
+      "config": {
+        "configurable": {
+          "system_prompt": "You are a helpful AI assistant with access to tools. You can help users with weather information, mathematical calculations, and provide the current time.\n\nWhen using tools:\n- For weather: Ask for a specific location if not provided\n- For calculations: Ensure the expression is mathematically valid\n- Always provide clear, helpful responses\n\nBe conversational and friendly while being accurate and helpful."
+        }
+      },
+      "interrupt_before": [],
+      "interrupt_after": [],
+      "metadata": {
+        "created_by": "LangGraph Streamlit Deployment",
+        "description": "Interactive chat agent with configurable system prompt and tool calling",
+        "version": "1.0.0"
+      }
+    }
+  }
+}
