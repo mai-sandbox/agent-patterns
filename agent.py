@@ -119,27 +119,6 @@ def create_agent_with_config(system_prompt: str = None) -> CompiledStateGraph:
     return agent
 
 
-# Create a configurable agent using create_react_agent with configurable prompt
-from langchain_core.runnables import RunnableConfig
-from typing import Optional
-
-def get_system_prompt_from_config(config: Optional[RunnableConfig] = None) -> str:
-    """Extract system prompt from runtime configuration."""
-    default_prompt = """You are a helpful AI assistant with access to tools. 
-    You can help users with weather information, mathematical calculations, and provide the current time.
-    
-    When using tools:
-    - For weather: Ask for a specific location if not provided
-    - For calculations: Ensure the expression is mathematically valid
-    - Always provide clear, helpful responses
-    
-    Be conversational and friendly while being accurate and helpful."""
-    
-    if config and config.get("configurable"):
-        return config["configurable"].get("system_prompt", default_prompt)
-    return default_prompt
-
-
 # Initialize the language model (preferring Anthropic as per guidelines)
 model = ChatAnthropic(
     model="claude-3-5-sonnet-20241022",
@@ -147,12 +126,23 @@ model = ChatAnthropic(
     max_tokens=2048
 )
 
-# Create the react agent with tools and configurable system prompt
-# The prompt will be dynamically set based on configuration
+# Default system prompt
+default_system_prompt = """You are a helpful AI assistant with access to tools. 
+You can help users with weather information, mathematical calculations, and provide the current time.
+
+When using tools:
+- For weather: Ask for a specific location if not provided
+- For calculations: Ensure the expression is mathematically valid
+- Always provide clear, helpful responses
+
+Be conversational and friendly while being accurate and helpful."""
+
+# Create the react agent with tools and default system prompt
+# The system prompt can be overridden via configuration in langgraph.json
 app = create_react_agent(
     model=model,
     tools=tools,
-    prompt=get_system_prompt_from_config()
+    prompt=default_system_prompt
 )
 
 
@@ -179,5 +169,6 @@ if __name__ == "__main__":
                 print(f"Assistant: {assistant_msg.content}")
         except Exception as e:
             print(f"Error: {e}")
+
 
 
