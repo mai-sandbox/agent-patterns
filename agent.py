@@ -119,41 +119,41 @@ def create_agent_with_config(system_prompt: str = None) -> CompiledStateGraph:
     return agent
 
 
-# Create a configurable agent that can receive runtime configuration
-from langgraph.graph import StateGraph
-from langgraph.prebuilt.chat_agent_executor import AgentState
-from langgraph.runtime import Runtime
-from typing import Optional
+# Create a configurable agent using create_react_agent with configurable prompt
 from langchain_core.runnables import RunnableConfig
+from typing import Optional
 
-def create_configurable_agent():
-    """Create a configurable agent that can receive system prompt from runtime config."""
+def get_system_prompt_from_config(config: Optional[RunnableConfig] = None) -> str:
+    """Extract system prompt from runtime configuration."""
+    default_prompt = """You are a helpful AI assistant with access to tools. 
+    You can help users with weather information, mathematical calculations, and provide the current time.
     
-    def agent_with_config(state: AgentState, config: Optional[RunnableConfig] = None):
-        """Agent node that uses configurable system prompt."""
-        # Extract system prompt from config
-        system_prompt = None
-        if config and config.get("configurable"):
-            system_prompt = config["configurable"].get("system_prompt")
-        
-        # Create agent with the configured system prompt
-        agent = create_agent_with_config(system_prompt)
-        
-        # Invoke the agent with the current state
-        return agent.invoke(state, config)
+    When using tools:
+    - For weather: Ask for a specific location if not provided
+    - For calculations: Ensure the expression is mathematically valid
+    - Always provide clear, helpful responses
     
-    # Create a simple graph that uses the configurable agent
-    workflow = StateGraph(AgentState)
-    workflow.add_node("agent", agent_with_config)
-    workflow.set_entry_point("agent")
-    workflow.set_finish_point("agent")
+    Be conversational and friendly while being accurate and helpful."""
     
-    return workflow.compile()
+    if config and config.get("configurable"):
+        return config["configurable"].get("system_prompt", default_prompt)
+    return default_prompt
 
 
-# Create the default agent instance for deployment
-# This is the main export that langgraph dev will use
-app = create_configurable_agent()
+# Initialize the language model (preferring Anthropic as per guidelines)
+model = ChatAnthropic(
+    model="claude-3-5-sonnet-20241022",
+    temperature=0.1,
+    max_tokens=2048
+)
+
+# Create the react agent with tools and configurable system prompt
+# The prompt will be dynamically set based on configuration
+app = create_react_agent(
+    model=model,
+    tools=tools,
+    prompt=get_system_prompt_from_config()
+)
 
 
 if __name__ == "__main__":
@@ -179,4 +179,5 @@ if __name__ == "__main__":
                 print(f"Assistant: {assistant_msg.content}")
         except Exception as e:
             print(f"Error: {e}")
+
 
