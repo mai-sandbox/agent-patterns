@@ -3,10 +3,9 @@ Streamlit application for LangGraph agent interaction and feedback.
 Connects to a LangGraph agent deployed using 'langgraph dev'.
 """
 
-import asyncio
 import json
 import os
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 import streamlit as st
 import httpx
 from dotenv import load_dotenv

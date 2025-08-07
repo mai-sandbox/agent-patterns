@@ -3,7 +3,6 @@ Simple chat agent with tool calling capabilities for LangGraph.
 Includes configurable system prompt and basic tools.
 """
 
-import operator
 from typing import Annotated, Sequence, TypedDict
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langchain_core.tools import tool
