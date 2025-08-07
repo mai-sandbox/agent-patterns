@@ -293,7 +293,13 @@ class BasicChatbot:
             if not ai_response:
                 raise ChatbotError("No AI response found in result")
             
-            response_text = ai_response.content
+            response_content = ai_response.content
+            if isinstance(response_content, str):
+                response_text = response_content
+            else:
+                # Handle list or other content types
+                response_text = str(response_content)
+            
             final_history = result["messages"]
             
             logger.info(f"Generated response with history for session {session_id}")
@@ -380,6 +386,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
 
