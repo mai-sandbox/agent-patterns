@@ -4,7 +4,7 @@
   ],
   "graphs": {
     "agent": {
-      "path": "agent.py:app",
+      "path": "agent:app",
       "description": "A simple chat agent with tool calling capabilities including weather, calculator, and time tools"
     }
   },
@@ -28,3 +28,4 @@
     }
   }
 }
+
