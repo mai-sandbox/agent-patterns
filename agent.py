@@ -19,10 +19,10 @@ from langgraph.graph.state import CompiledStateGraph
 @tool
 def get_weather(location: str) -> str:
     """Get the current weather for a given location.
-    
+
     Args:
         location: The city or location to get weather for
-        
+
     Returns:
         A string describing the current weather conditions
     """
@@ -32,9 +32,9 @@ def get_weather(location: str) -> str:
         "london": "Cloudy, 15°C with occasional rain",
         "tokyo": "Partly cloudy, 25°C with high humidity",
         "paris": "Clear skies, 18°C with gentle breeze",
-        "sydney": "Overcast, 22°C with strong winds"
+        "sydney": "Overcast, 22°C with strong winds",
     }
-    
+
     location_lower = location.lower()
     if location_lower in weather_data:
         return f"Weather in {location}: {weather_data[location_lower]}"
@@ -45,20 +45,20 @@ def get_weather(location: str) -> str:
 @tool
 def calculator(expression: str) -> str:
     """Perform basic mathematical calculations.
-    
+
     Args:
         expression: A mathematical expression to evaluate (e.g., "2 + 3 * 4")
-        
+
     Returns:
         The result of the calculation as a string
     """
     try:
         # Use eval safely for basic math operations
         # In production, you'd want to use a more secure math parser
-        allowed_chars = set('0123456789+-*/.() ')
+        allowed_chars = set("0123456789+-*/.() ")
         if not all(c in allowed_chars for c in expression):
             return "Error: Invalid characters in expression. Only numbers and basic operators (+, -, *, /, parentheses) are allowed."
-        
+
         result = eval(expression)
         return f"Result: {result}"
     except Exception as e:
@@ -68,11 +68,12 @@ def calculator(expression: str) -> str:
 @tool
 def get_time() -> str:
     """Get the current time and date.
-    
+
     Returns:
         Current date and time as a string
     """
     from datetime import datetime
+
     now = datetime.now()
     return f"Current date and time: {now.strftime('%Y-%m-%d %H:%M:%S')}"
 
@@ -83,10 +84,10 @@ tools = [get_weather, calculator, get_time]
 
 def create_agent(system_prompt: Optional[str] = None) -> CompiledStateGraph:
     """Create a LangGraph chat agent with configurable system prompt.
-    
+
     Args:
         system_prompt: Custom system prompt for the agent. If None, uses default.
-        
+
     Returns:
         Compiled LangGraph agent ready for deployment
     """
@@ -101,29 +102,21 @@ def create_agent(system_prompt: Optional[str] = None) -> CompiledStateGraph:
         - Always provide clear, helpful responses
         
         Be conversational and friendly while being accurate and helpful."""
-    
+
     # Initialize the language model (preferring Anthropic as per guidelines)
     model = ChatAnthropic(
-        model_name="claude-3-5-sonnet-20241022",
-        temperature=0.1,
-        max_tokens=2048
+        model_name="claude-3-5-sonnet-20241022", temperature=0.1, max_tokens=2048
     )
-    
+
     # Create the react agent with tools and system prompt
-    agent = create_react_agent(
-        model=model,
-        tools=tools,
-        prompt=system_prompt
-    )
-    
+    agent = create_react_agent(model=model, tools=tools, prompt=system_prompt)
+
     return agent
 
 
 # Initialize the language model (preferring Anthropic as per guidelines)
 model = ChatAnthropic(
-    model_name="claude-3-5-sonnet-20241022",
-    temperature=0.1,
-    max_tokens=2048
+    model_name="claude-3-5-sonnet-20241022", temperature=0.1, max_tokens=2048
 )
 
 # Default system prompt
@@ -139,27 +132,23 @@ Be conversational and friendly while being accurate and helpful."""
 
 # Create the react agent with tools and default system prompt
 # The system prompt can be overridden via configuration in langgraph.json
-app = create_react_agent(
-    model=model,
-    tools=tools,
-    prompt=default_system_prompt
-)
+app = create_react_agent(model=model, tools=tools, prompt=default_system_prompt)
 
 
 if __name__ == "__main__":
     # Test the agent locally
     print("Testing LangGraph Chat Agent...")
-    
+
     # Test with default system prompt
     test_agent = create_agent()
-    
+
     # Example test messages
     test_messages = [
         {"role": "human", "content": "What's the weather like in New York?"},
         {"role": "human", "content": "Calculate 15 * 7 + 23"},
-        {"role": "human", "content": "What time is it?"}
+        {"role": "human", "content": "What time is it?"},
     ]
-    
+
     for msg in test_messages:
         print(f"\nUser: {msg['content']}")
         try:
@@ -169,11 +158,3 @@ if __name__ == "__main__":
                 print(f"Assistant: {assistant_msg.content}")
         except Exception as e:
             print(f"Error: {e}")
-
-
-
-
-
-
-
-
