@@ -85,8 +85,8 @@ class BasicChatbot:
             os.environ["ANTHROPIC_API_KEY"] = api_key
             
             self.llm = ChatAnthropic(
-                model=self.model_name,
-                max_tokens=self.max_tokens,
+                model_name=self.model_name,
+                max_tokens_to_sample=self.max_tokens,
                 temperature=self.temperature
             )
             
@@ -388,6 +388,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
 
