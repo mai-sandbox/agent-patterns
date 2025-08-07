@@ -1,0 +1,30 @@
+# Core LangGraph and LangChain dependencies
+langgraph>=0.2.0
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-anthropic>=0.2.0
+
+# LangGraph CLI and SDK for development and deployment
+langgraph-cli[inmem]>=0.1.0
+langgraph-sdk>=0.1.0
+
+# Streamlit for web interface
+streamlit>=1.28.0
+
+# Async support for Streamlit integration
+nest-asyncio>=1.5.0
+
+# HTTP client for API requests
+httpx>=0.25.0
+
+# Additional LangChain integrations (optional but commonly used)
+langchain-openai>=0.2.0
+langchain-google-genai>=2.0.0
+
+# Development and utility packages
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+typing-extensions>=4.8.0
+
+# Optional: For enhanced tool functionality
+requests>=2.31.0
