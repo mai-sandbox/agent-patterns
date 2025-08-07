@@ -114,24 +114,58 @@ async def stream_agent_response(client, user_input: str, system_prompt: str) -> 
             config=config,
             stream_mode="messages"
         ):
-            # Process streaming chunks
-            if hasattr(chunk, 'data') and chunk.data:
-                # Extract message content from the chunk
-                for key, value in chunk.data.items():
-                    if isinstance(value, dict) and 'messages' in value:
-                        messages = value['messages']
-                        if messages and isinstance(messages[-1], dict):
-                            content = messages[-1].get('content', '')
-                            if content and content != full_response:
-                                full_response = content
-                                # Update the streaming display
-                                response_placeholder.markdown(f"**🤖 Assistant:** {full_response}")
+            # Debug: Print chunk structure to understand the data format
+            if hasattr(chunk, 'event') and hasattr(chunk, 'data'):
+                if chunk.event == "messages":
+                    # Handle messages event
+                    if chunk.data and len(chunk.data) > 0:
+                        message = chunk.data[-1]  # Get the latest message
+                        if hasattr(message, 'content'):
+                            content = message.content
+                        elif isinstance(message, dict) and 'content' in message:
+                            content = message['content']
+                        else:
+                            content = str(message)
+                        
+                        if content and content != full_response:
+                            full_response = content
+                            # Update the streaming display
+                            response_placeholder.markdown(f"**🤖 Assistant:** {full_response}")
+                
+                elif chunk.event == "updates":
+                    # Handle updates event
+                    if chunk.data:
+                        for key, value in chunk.data.items():
+                            if isinstance(value, dict) and 'messages' in value:
+                                messages = value['messages']
+                                if messages and len(messages) > 0:
+                                    last_message = messages[-1]
+                                    if hasattr(last_message, 'content'):
+                                        content = last_message.content
+                                    elif isinstance(last_message, dict) and 'content' in last_message:
+                                        content = last_message['content']
+                                    else:
+                                        continue
+                                    
+                                    if content and content != full_response:
+                                        full_response = content
+                                        # Update the streaming display
+                                        response_placeholder.markdown(f"**🤖 Assistant:** {full_response}")
+        
+        # If no response was streamed, return a default message
+        if not full_response:
+            full_response = "No response received from the agent."
         
         return full_response
         
     except Exception as e:
-        st.error(f"Error streaming agent response: {str(e)}")
-        return f"Error: {str(e)}"
+        error_msg = str(e)
+        if "authentication" in error_msg.lower() or "api_key" in error_msg.lower():
+            st.error("⚠️ **API Key Required**: Please set your ANTHROPIC_API_KEY in the .env file to use the agent.")
+            return "Error: API key not configured. Please check the .env file and add your ANTHROPIC_API_KEY."
+        else:
+            st.error(f"Error streaming agent response: {error_msg}")
+            return f"Error: {error_msg}"
 
 
 def update_system_prompt_from_feedback(feedback: str, current_prompt: str) -> str:
@@ -358,3 +392,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
