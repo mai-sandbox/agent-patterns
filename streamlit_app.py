@@ -106,18 +106,18 @@ async def stream_agent_response(client, user_input: str, system_prompt: str) -> 
         response_placeholder = st.empty()
         full_response = ""
         
-        # Stream the agent run
+        # Stream the agent run (following official LangGraph SDK pattern)
         async for chunk in client.runs.stream(
             None,  # Threadless run
             st.session_state.assistant_id,
             input=input_data,
-            config=config,
-            stream_mode="messages"
+            config=config
         ):
-            # Debug: Print chunk structure to understand the data format
+            # Process streaming chunks following official documentation pattern
             if hasattr(chunk, 'event') and hasattr(chunk, 'data'):
+                # Handle different event types as per LangGraph SDK documentation
                 if chunk.event == "messages":
-                    # Handle messages event
+                    # Handle messages event - direct message streaming
                     if chunk.data and len(chunk.data) > 0:
                         message = chunk.data[-1]  # Get the latest message
                         if hasattr(message, 'content'):
@@ -133,11 +133,11 @@ async def stream_agent_response(client, user_input: str, system_prompt: str) -> 
                             response_placeholder.markdown(f"**🤖 Assistant:** {full_response}")
                 
                 elif chunk.event == "updates":
-                    # Handle updates event
+                    # Handle updates event - node-based updates
                     if chunk.data:
-                        for key, value in chunk.data.items():
-                            if isinstance(value, dict) and 'messages' in value:
-                                messages = value['messages']
+                        for node_name, node_data in chunk.data.items():
+                            if isinstance(node_data, dict) and 'messages' in node_data:
+                                messages = node_data['messages']
                                 if messages and len(messages) > 0:
                                     last_message = messages[-1]
                                     if hasattr(last_message, 'content'):
@@ -151,6 +151,16 @@ async def stream_agent_response(client, user_input: str, system_prompt: str) -> 
                                         full_response = content
                                         # Update the streaming display
                                         response_placeholder.markdown(f"**🤖 Assistant:** {full_response}")
+                
+                elif chunk.event == "metadata":
+                    # Handle metadata events (run_id, etc.) - no display update needed
+                    continue
+                
+                elif chunk.event == "error":
+                    # Handle error events
+                    error_msg = chunk.data.get('message', 'Unknown error') if chunk.data else 'Unknown error'
+                    st.error(f"Agent error: {error_msg}")
+                    return f"Error: {error_msg}"
         
         # If no response was streamed, return a default message
         if not full_response:
@@ -392,4 +402,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
