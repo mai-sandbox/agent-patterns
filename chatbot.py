@@ -221,9 +221,15 @@ class BasicChatbot:
                 raise ChatbotError("Expected AI message in response")
             
             response = last_message.content
-            logger.info(f"Generated response for session {session_id}: {response[:50]}...")
+            if isinstance(response, str):
+                response_text = response
+            else:
+                # Handle list or other content types
+                response_text = str(response)
             
-            return response
+            logger.info(f"Generated response for session {session_id}: {response_text[:50]}...")
+            
+            return response_text
             
         except ChatbotError:
             raise
@@ -374,6 +380,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
 
