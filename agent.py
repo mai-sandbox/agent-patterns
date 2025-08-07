@@ -116,7 +116,7 @@ def create_agent(system_prompt: Optional[str] = None) -> CompiledStateGraph:
 
 # Initialize the language model (preferring Anthropic as per guidelines)
 model = ChatAnthropic(
-    model_name="claude-3-5-sonnet-20241022", temperature=0.1, max_tokens=2048
+    model_name="claude-3-5-sonnet-20241022", temperature=0.1
 )
 
 # Default system prompt
@@ -158,4 +158,5 @@ if __name__ == "__main__":
                 print(f"Assistant: {assistant_msg.content}")
         except Exception as e:
             print(f"Error: {e}")
+
 
