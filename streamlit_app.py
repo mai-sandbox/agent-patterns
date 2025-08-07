@@ -270,53 +270,53 @@ def main():
                                 "role": "assistant",
                                 "content": error_msg
                             })
-                            break
-                        
-                        # Handle different streaming modes
-                        if "event" in chunk:
-                            event_type = chunk.get("event")
+                                break
                             
-                            # Handle agent progress updates
-                            if event_type == "on_chain_start":
-                                if agent_thinking:
-                                    progress_placeholder.info("🔧 Using tools...")
-                            elif event_type == "on_tool_start":
-                                tool_name = chunk.get("name", "unknown tool")
-                                progress_placeholder.info(f"🛠️ Using {tool_name}...")
-                            elif event_type == "on_tool_end":
-                                progress_placeholder.info("💭 Processing tool results...")
-                            elif event_type == "on_chat_model_start":
-                                progress_placeholder.info("🧠 Generating response...")
-                                agent_thinking = False
-                        
-                        # Handle LLM token streaming
-                        if "data" in chunk:
-                            data = chunk["data"]
-                            
-                            # Handle different data types
-                            if isinstance(data, dict):
-                                # Handle message chunks
-                                if "chunk" in data:
-                                    chunk_data = data["chunk"]
-                                    if isinstance(chunk_data, dict) and "content" in chunk_data:
-                                        token = chunk_data["content"]
-                                        if token:
-                                            full_response += token
-                                            # Update display with current response
-                                            response_placeholder.markdown(full_response + "▌")
+                            # Handle different streaming modes
+                            if "event" in chunk:
+                                event_type = chunk.get("event")
                                 
-                                # Handle complete messages
-                                elif "messages" in data:
-                                    messages = data["messages"]
-                                    for msg in messages:
-                                        if msg.get("type") == "ai" or msg.get("role") == "assistant":
-                                            content = msg.get("content", "")
-                                            if content and content != full_response:
-                                                full_response = content
+                                # Handle agent progress updates
+                                if event_type == "on_chain_start":
+                                    if agent_thinking:
+                                        progress_placeholder.info("🔧 Using tools...")
+                                elif event_type == "on_tool_start":
+                                    tool_name = chunk.get("name", "unknown tool")
+                                    progress_placeholder.info(f"🛠️ Using {tool_name}...")
+                                elif event_type == "on_tool_end":
+                                    progress_placeholder.info("💭 Processing tool results...")
+                                elif event_type == "on_chat_model_start":
+                                    progress_placeholder.info("🧠 Generating response...")
+                                    agent_thinking = False
+                            
+                            # Handle LLM token streaming
+                            if "data" in chunk:
+                                data = chunk["data"]
+                                
+                                # Handle different data types
+                                if isinstance(data, dict):
+                                    # Handle message chunks
+                                    if "chunk" in data:
+                                        chunk_data = data["chunk"]
+                                        if isinstance(chunk_data, dict) and "content" in chunk_data:
+                                            token = chunk_data["content"]
+                                            if token:
+                                                full_response += token
+                                                # Update display with current response
                                                 response_placeholder.markdown(full_response + "▌")
-                        
-                        # Handle custom updates
-                        if "output" in chunk:
+                                    
+                                    # Handle complete messages
+                                    elif "messages" in data:
+                                        messages = data["messages"]
+                                        for msg in messages:
+                                            if msg.get("type") == "ai" or msg.get("role") == "assistant":
+                                                content = msg.get("content", "")
+                                                if content and content != full_response:
+                                                    full_response = content
+                                                    response_placeholder.markdown(full_response + "▌")
+                            
+                            # Handle custom updates
+                            if "output" in chunk:
                             output = chunk["output"]
                             if "messages" in output:
                                 messages = output["messages"]
@@ -477,6 +477,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
