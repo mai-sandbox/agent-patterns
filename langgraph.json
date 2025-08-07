@@ -1,0 +1,26 @@
+{
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "agent": {
+      "path": "agent.py:app",
+      "description": "Simple chat agent with tool calling capabilities",
+      "config_schema": {
+        "system_prompt": {
+          "type": "string",
+          "default": "You are a helpful AI assistant with access to tools.",
+          "description": "The system prompt that defines the agent's behavior and personality"
+        }
+      }
+    }
+  },
+  "env": ".env",
+  "python_version": "3.11",
+  "dockerfile_lines": [
+    "RUN pip install --no-cache-dir -r requirements.txt"
+  ],
+  "port": 8123,
+  "host": "0.0.0.0"
+}
+
