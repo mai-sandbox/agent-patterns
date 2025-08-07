@@ -87,7 +87,9 @@ class BasicChatbot:
             self.llm = ChatAnthropic(
                 model_name=self.model_name,
                 max_tokens_to_sample=self.max_tokens,
-                temperature=self.temperature
+                temperature=self.temperature,
+                timeout=60.0,
+                stop=[]
             )
             
             # Build the conversation graph
@@ -388,6 +390,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
 
