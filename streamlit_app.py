@@ -166,6 +166,104 @@ def display_chat_messages():
             st.write(message["content"])
 
 
+def update_system_prompt_with_feedback(feedback: str, current_prompt: str) -> str:
+    """
+    Update the system prompt based on user feedback.
+    
+    Args:
+        feedback: User feedback about the agent's response
+        current_prompt: Current system prompt
+        
+    Returns:
+        Updated system prompt incorporating the feedback
+    """
+    # Simple feedback integration - append feedback as additional instruction
+    feedback_instruction = f"\n\nAdditional user guidance: {feedback.strip()}"
+    
+    # Avoid duplicate feedback by checking if similar feedback already exists
+    if feedback.strip().lower() not in current_prompt.lower():
+        updated_prompt = current_prompt + feedback_instruction
+    else:
+        updated_prompt = current_prompt
+    
+    return updated_prompt
+
+
+def feedback_section():
+    """Display the feedback collection interface."""
+    st.subheader("💬 Provide Feedback")
+    st.markdown("Help improve the agent's responses by providing feedback on the last interaction.")
+    
+    # Feedback text area
+    feedback_text = st.text_area(
+        "What would you like the agent to do differently next time?",
+        value=st.session_state.feedback_text,
+        height=100,
+        placeholder="e.g., 'Be more concise', 'Provide more examples', 'Focus on practical solutions'...",
+        help="Your feedback will be used to update the system prompt and improve future responses."
+    )
+    
+    # Update session state with current feedback text
+    st.session_state.feedback_text = feedback_text
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Submit feedback button
+        if st.button("📝 Submit Feedback", type="primary", disabled=not feedback_text.strip()):
+            if feedback_text.strip():
+                # Update system prompt with feedback
+                old_prompt = st.session_state.system_prompt
+                updated_prompt = update_system_prompt_with_feedback(
+                    feedback_text, 
+                    st.session_state.system_prompt
+                )
+                
+                st.session_state.system_prompt = updated_prompt
+                st.session_state.feedback_submitted = True
+                
+                # Show success message
+                st.success("✅ Feedback submitted! System prompt has been updated.")
+                
+                # Clear feedback text
+                st.session_state.feedback_text = ""
+                
+                # Show what changed
+                if updated_prompt != old_prompt:
+                    with st.expander("📋 View System Prompt Changes"):
+                        st.markdown("**Updated System Prompt:**")
+                        st.text_area("", value=updated_prompt, height=150, disabled=True)
+                
+                st.rerun()
+    
+    with col2:
+        # Rerun with updated config button
+        if st.button(
+            "🔄 Rerun with Updated Config", 
+            type="secondary",
+            disabled=not (st.session_state.feedback_submitted and st.session_state.last_user_input),
+            help="Re-execute the previous input with the updated system prompt"
+        ):
+            if st.session_state.last_user_input:
+                # Clear feedback state
+                st.session_state.show_feedback = False
+                st.session_state.feedback_submitted = False
+                
+                # Add a separator message to show the rerun
+                st.session_state.messages.append({
+                    "role": "system",
+                    "content": "🔄 **Rerunning with updated configuration...**"
+                })
+                
+                # Re-add the user input to trigger a new response
+                st.session_state.messages.append({
+                    "role": "user",
+                    "content": st.session_state.last_user_input
+                })
+                
+                st.rerun()
+
+
 def configuration_panel():
     """Display the configuration panel in the sidebar."""
     st.sidebar.header("🔧 Configuration")
@@ -430,6 +528,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
