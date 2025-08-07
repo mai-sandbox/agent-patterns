@@ -82,7 +82,7 @@ def create_agent_with_config(system_prompt: str = "You are a helpful AI assistan
         last_message = messages[-1]
         
         # If the LLM makes a tool call, then we route to the "tools" node
-        if last_message.tool_calls:
+        if hasattr(last_message, 'tool_calls') and last_message.tool_calls:
             return "tools"
         # Otherwise, we stop (reply to the user)
         return END
@@ -159,3 +159,4 @@ if __name__ == "__main__":
             print(f"System: {message.content}")
         else:
             print(f"Assistant: {message.content}")
+
