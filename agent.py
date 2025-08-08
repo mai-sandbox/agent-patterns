@@ -182,7 +182,7 @@ class SupportTicketTriageAgent:
             
             return {"summary": summary}
             
-        except Exception as e:
+        except Exception:
             # Error handling - create basic summary
             category = state.get('category', 'support')
             return {"summary": f"Customer submitted a {category.lower()} request requiring assistance."}
@@ -323,5 +323,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
