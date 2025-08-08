@@ -43,8 +43,8 @@ class SupportTicketTriageAgent:
             raise ValueError("ANTHROPIC_API_KEY environment variable is required")
         
         self.llm = ChatAnthropic(
-            model=model_name,
-            api_key=api_key,
+            model_name=model_name,
+            anthropic_api_key=api_key,
             temperature=0.1
         )
         
@@ -323,6 +323,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
