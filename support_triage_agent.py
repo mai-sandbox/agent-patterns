@@ -113,7 +113,7 @@ Respond with ONLY the category name: "Billing", "Technical", or "General Inquiry
             ]
             
             response = self.llm.invoke(messages)
-            category = response.content.strip()
+            category = str(response.content).strip()
             
             # Validate category
             valid_categories = ["Billing", "Technical", "General Inquiry"]
@@ -430,4 +430,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
