@@ -47,7 +47,7 @@ class SupportTicketTriageAgent:
         # Note: api_key parameter may need to be passed via environment variable
         os.environ["ANTHROPIC_API_KEY"] = api_key
         self.llm = ChatAnthropic(
-            model=model_name,
+            model_name=model_name,
             temperature=0.1
         )
         
@@ -327,6 +327,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
