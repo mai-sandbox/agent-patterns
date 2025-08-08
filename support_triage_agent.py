@@ -288,7 +288,7 @@ Respond with ONLY the 1-2 sentence acknowledgment."""
             ]
             
             response = self.llm.invoke(messages)
-            acknowledgment = response.content.strip()
+            acknowledgment = str(response.content).strip()
             
             logger.info("Acknowledgment generated successfully")
             return {"acknowledgment": acknowledgment}
@@ -430,6 +430,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
