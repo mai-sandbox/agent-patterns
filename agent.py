@@ -290,7 +290,7 @@ class SupportTicketTriageAgent:
         result = self.graph.invoke(initial_state)
         
         # Type cast to ensure proper return type
-        return TicketState(result)
+        return cast(TicketState, result)
 
 
 def main():
@@ -325,6 +325,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
