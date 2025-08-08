@@ -6,7 +6,7 @@ for customer support tickets.
 """
 
 import os
-from typing import Dict, Any
+from typing import Dict, Any, cast
 from dotenv import load_dotenv
 
 from langchain_anthropic import ChatAnthropic
@@ -325,6 +325,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
