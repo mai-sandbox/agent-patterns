@@ -44,11 +44,13 @@ class SupportTicketTriageAgent:
             raise ValueError("ANTHROPIC_API_KEY environment variable is required")
         
         # Initialize ChatAnthropic with proper parameters
-        # Note: api_key parameter may need to be passed via environment variable
+        # Set API key in environment for ChatAnthropic to use
         os.environ["ANTHROPIC_API_KEY"] = api_key
         self.llm = ChatAnthropic(
             model_name=model_name,
-            temperature=0.1
+            temperature=0.1,
+            timeout=60,
+            stop=None
         )
         
         # Build the workflow graph
@@ -327,6 +329,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
