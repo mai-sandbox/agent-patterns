@@ -175,7 +175,7 @@ class SupportTicketTriageAgent:
             """
             
             response = self.llm.invoke(prompt)
-            summary = response.content.strip()
+            summary = str(response.content).strip()
             
             # Ensure it's a single sentence
             if not summary.endswith('.'):
@@ -324,6 +324,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
