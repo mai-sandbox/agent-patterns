@@ -297,7 +297,7 @@ Respond with ONLY the 1-2 sentence acknowledgment."""
             logger.error(f"Error in generate_acknowledgment: {str(e)}")
             return {"acknowledgment": "Thank you for contacting us. Your ticket has been received and will be addressed by our support team."}
     
-    def _build_graph(self) -> StateGraph:
+    def _build_graph(self) -> CompiledStateGraph:
         """
         Build the LangGraph workflow with sequential node connections.
         
@@ -430,6 +430,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
