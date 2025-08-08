@@ -253,7 +253,7 @@ class SupportTicketTriageAgent:
             """
             
             response = self.llm.invoke(prompt)
-            acknowledgement = response.content.strip()
+            acknowledgement = str(response.content).strip()
             
             return {"acknowledgement": acknowledgement}
             
@@ -324,6 +324,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
