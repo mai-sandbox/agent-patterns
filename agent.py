@@ -100,7 +100,7 @@ class SupportTicketTriageAgent:
             """
             
             response = self.llm.invoke(prompt)
-            category = response.content.strip()
+            category = str(response.content).strip()
             
             # Validate category
             valid_categories = ["Billing", "Technical", "General Inquiry"]
@@ -324,6 +324,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
