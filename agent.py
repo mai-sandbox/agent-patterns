@@ -52,7 +52,7 @@ class SupportTicketTriageAgent:
         # Build the workflow graph
         self.graph = self._build_graph()
     
-    def _build_graph(self) -> StateGraph:
+    def _build_graph(self) -> CompiledStateGraph:
         """Build the LangGraph workflow for ticket triage.
         
         Returns:
@@ -324,6 +324,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
