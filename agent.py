@@ -256,7 +256,7 @@ class SupportTicketTriageAgent:
             
             return {"acknowledgement": acknowledgement}
             
-        except Exception as e:
+        except Exception:
             # Error handling - create basic acknowledgement
             return {"acknowledgement": "Thank you for contacting us. Your request has been received and routed to the appropriate team for assistance."}
     
@@ -323,6 +323,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
