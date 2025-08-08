@@ -161,7 +161,7 @@ Respond with ONLY the priority level: "High", "Medium", or "Low"."""
             ]
             
             response = self.llm.invoke(messages)
-            priority = response.content.strip()
+            priority = str(response.content).strip()
             
             # Validate priority
             valid_priorities = ["High", "Medium", "Low"]
@@ -430,5 +430,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
