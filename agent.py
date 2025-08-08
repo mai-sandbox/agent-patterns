@@ -150,7 +150,7 @@ class SupportTicketTriageAgent:
             
             return {"priority": priority}
             
-        except Exception as e:
+        except Exception:
             # Error handling - default to Medium priority
             return {"priority": "Medium"}
     
@@ -323,4 +323,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
