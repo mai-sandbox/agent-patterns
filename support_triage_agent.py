@@ -212,7 +212,7 @@ Respond with ONLY the one-sentence summary."""
             ]
             
             response = self.llm.invoke(messages)
-            summary = response.content.strip()
+            summary = str(response.content).strip()
             
             # Ensure it's a single sentence (basic validation)
             if not summary.endswith('.'):
@@ -430,6 +430,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
