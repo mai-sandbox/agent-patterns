@@ -109,7 +109,7 @@ class SupportTicketTriageAgent:
             
             return {"category": category}
             
-        except Exception as e:
+        except Exception:
             # Error handling - default to General Inquiry
             return {"category": "General Inquiry"}
     
@@ -323,3 +323,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
