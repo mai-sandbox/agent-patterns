@@ -66,7 +66,7 @@ class SupportTriageAgent:
         # Initialize LLM
         self.llm = ChatAnthropic(
             model="claude-3-sonnet-20240229",
-            api_key=self.api_key,
+            api_key=SecretStr(self.api_key),
             temperature=0.1
         )
         
@@ -431,6 +431,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
