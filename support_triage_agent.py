@@ -67,7 +67,9 @@ class SupportTriageAgent:
         self.llm = ChatAnthropic(
             model_name="claude-3-sonnet-20240229",
             api_key=SecretStr(self.api_key),
-            temperature=0.1
+            temperature=0.1,
+            timeout=60,
+            stop=None
         )
         
         # Email routing rules
@@ -431,6 +433,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
