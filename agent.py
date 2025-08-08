@@ -289,7 +289,8 @@ class SupportTicketTriageAgent:
         # Execute the workflow
         result = self.graph.invoke(initial_state)
         
-        return result
+        # Type cast to ensure proper return type
+        return TicketState(result)
 
 
 def main():
@@ -324,6 +325,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
