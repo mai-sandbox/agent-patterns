@@ -216,7 +216,7 @@ class SupportTicketTriageAgent:
             
             return {"email": email}
             
-        except Exception as e:
+        except Exception:
             # Error handling - default to general support
             return {"email": "support@company.com"}
     
@@ -323,6 +323,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
