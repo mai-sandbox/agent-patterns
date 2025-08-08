@@ -1,0 +1,21 @@
+# Core LangGraph and LangChain dependencies
+langgraph>=0.2.0
+langchain>=4.0.0
+langsmith>=0.2.0
+
+# LLM Provider integrations
+langchain-openai>=0.1.0
+langchain-anthropic>=0.1.0
+langchain-google-genai>=1.0.0
+
+# Environment and configuration management
+python-dotenv>=1.0.0
+
+# Type system support
+typing-extensions>=4.0.0
+
+# Additional core dependencies (automatically installed with above packages)
+# langchain-core - Core LangChain abstractions and interfaces
+# pydantic - Data validation and settings management
+# PyYAML - YAML parsing support
+# requests - HTTP library for API calls
