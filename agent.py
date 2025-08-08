@@ -141,7 +141,7 @@ class SupportTicketTriageAgent:
             """
             
             response = self.llm.invoke(prompt)
-            priority = response.content.strip()
+            priority = str(response.content).strip()
             
             # Validate priority
             valid_priorities = ["High", "Medium", "Low"]
@@ -324,6 +324,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
